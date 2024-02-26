@@ -123,9 +123,9 @@ if __name__ == "__main__":
         print('Using the default profiles: \n  color:{}, depth:{}'.format(
             color_profiles[0], depth_profiles[0]))
         w, h, fps, fmt = depth_profiles[0]
-        config.enable_stream(rs.stream.depth, w, h, fmt, fps)
+        config.enable_stream(rs.stream.depth, 1280, 720, fmt, 5)
         w, h, fps, fmt = color_profiles[0]
-        config.enable_stream(rs.stream.color, w, h, fmt, fps)
+        config.enable_stream(rs.stream.color, 1280, 720,fmt,5)
         if args.record_rosbag:
             config.enable_record_to_file(path_bag)
     if args.playback_rosbag:
