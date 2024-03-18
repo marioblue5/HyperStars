@@ -52,10 +52,10 @@ if __name__ == "__main__":
     print('Using the default profiles: \n  color:{}, depth:{}'.format(
         color_profiles[0], depth_profiles[0]))
     w, h, fps, fmt = depth_profiles[0]
-    print(fmt)
-    config.enable_stream(rs.stream.depth, 1280, 720, fmt, 5)
+    config.enable_stream(rs.stream.depth, 1280, 720, fmt, 15)
     w, h, fps, fmt = color_profiles[0]
-    config.enable_stream(rs.stream.color, 1280, 720,fmt,5)
+    config.enable_stream(rs.stream.color, 1280, 720,fmt,15)
+    print(fmt)
 
     # Start streaming
     profile = pipeline.start(config)

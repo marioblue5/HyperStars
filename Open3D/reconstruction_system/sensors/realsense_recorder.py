@@ -121,11 +121,12 @@ if __name__ == "__main__":
         # note: using 640 x 480 depth resolution produces smooth depth boundaries
         #       using rs.format.bgr8 for color image format for OpenCV based image visualization
         print('Using the default profiles: \n  color:{}, depth:{}'.format(
-            color_profiles[0], depth_profiles[0]))
+            color_profiles[5], depth_profiles[0]))
         w, h, fps, fmt = depth_profiles[0]
-        config.enable_stream(rs.stream.depth, 1280, 720, fmt, 5)
-        w, h, fps, fmt = color_profiles[0]
-        config.enable_stream(rs.stream.color, 1280, 720,fmt,5)
+        print(fmt)
+        config.enable_stream(rs.stream.depth, 640, 480, fmt, 15)
+        w, h, fps, fmt = color_profiles[5]
+        config.enable_stream(rs.stream.color, 640, 480, fmt,15)
         if args.record_rosbag:
             config.enable_record_to_file(path_bag)
     if args.playback_rosbag:
@@ -144,7 +145,7 @@ if __name__ == "__main__":
 
     # We will not display the background of objects more than
     #  clipping_distance_in_meters meters away
-    clipping_distance_in_meters = 3  # 3 meter
+    clipping_distance_in_meters = 1  # 3 meter
     clipping_distance = clipping_distance_in_meters / depth_scale
 
     # Create an align object
@@ -200,7 +201,7 @@ if __name__ == "__main__":
             cv2.namedWindow('Recorder Realsense', cv2.WINDOW_AUTOSIZE)
             cv2.imshow('Recorder Realsense', images)
             key = cv2.waitKey(1)
-
+ #HSV TO RGB!!!
             # if 'esc' button pressed, escape loop and exit program
             if key == 27:
                 cv2.destroyAllWindows()
