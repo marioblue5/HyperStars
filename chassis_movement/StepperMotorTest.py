@@ -5,6 +5,7 @@ import time
 DIR_pin = 18  # Direction pin
 STEP_pin = 32  # Step pin
 ENABLE_pin = 16  # Enable pin for the TMC2209
+LIMIT_pin = 22 # Limit Switch Pin
 
 # Motor setup
 steps_per_revolution = 2000  # Adjust this based on your motor's specification
@@ -14,6 +15,7 @@ GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
 GPIO.setup(DIR_pin, GPIO.OUT)
 GPIO.setup(STEP_pin, GPIO.OUT)
 GPIO.setup(ENABLE_pin, GPIO.OUT)
+GPIO.setup(LIMIT_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Function to enable/disable the motor driver
 def enable_motor(enable=True):
@@ -33,6 +35,8 @@ def move_motor(direction, steps, delay=0.0005):
     """
     GPIO.output(DIR_pin, direction)
     for _ in range(steps):
+        if GPIO.input(LIMIT_pin) == GPIO.LOW: 
+            break
         GPIO.output(STEP_pin, GPIO.HIGH)
         time.sleep(delay)
         GPIO.output(STEP_pin, GPIO.LOW)
