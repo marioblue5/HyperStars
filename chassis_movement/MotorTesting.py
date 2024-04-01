@@ -1,54 +1,49 @@
-import Jetson.GPIO as GPIO
+import Adafruit_PCA9685
 import time
 
-# Use 'BOARD' pin numbering
-GPIO.setmode(GPIO.BOARD)
+# Function to convert microseconds to PWM value
+def microseconds_to_pwm(value, freq=60):
+    return int((value / 1000000.0) * freq * 4096)
 
-# PWM pin - Choose between pin 32 and 33
-PWM_PIN = 32
+# Initialize the PCA9685 using the default address
+pwm = Adafruit_PCA9685.PCA9685(busnum=1)
 
-# Initialize PWM pin
-GPIO.setup(PWM_PIN, GPIO.OUT, initial=GPIO.LOW)
-pwm = GPIO.PWM(PWM_PIN, 50)  # Set frequency to 50Hz
+# Set the PWM frequency to 60 Hz (good for servos)
+pwm.set_pwm_freq(60)
 
-def microseconds_to_duty_cycle(microseconds):
-    """
-    Convert microseconds to a duty cycle percentage for the PWM signal.
-    PWM frequency for GPIO library is 50Hz, or 20,000 microseconds per period.
-    """
-    return (microseconds / 20000) * 100
+# Motor control parameters
+channel = 7  # Adjust based on your connection
+min_signal = 1050  # Minimum pulse length out of 4096
+max_signal = 2050  # Maximum pulse length out of 4096
 
-def start_motor():
-    """Start the motor by initializing PWM."""
-    pwm.start(microseconds_to_duty_cycle(1050))  # Start with the lowest signal
+# Convert microseconds to PWM values
+min_pwm = microseconds_to_pwm(min_signal, 60)
+max_pwm = microseconds_to_pwm(max_signal, 60)
+print(min_pwm)
+print(max_pwm)
 
-def change_motor_speed(microseconds):
-    """Change the motor speed to a specific value in microseconds."""
-    if 1050 <= microseconds <= 1950:
-        duty_cycle = microseconds_to_duty_cycle(microseconds)
-        pwm.ChangeDutyCycle(duty_cycle)
-    else:
-        print("Microsecond value out of range. Must be between 1050 and 1950.")
+# Example of setting motor to minimum position/speed
+print("Setting motor to minimum")
+pwm.set_pwm(channel, 0, min_pwm)
+time.sleep(2)
 
-def stop_motor():
-    """Stop the motor."""
-    pwm.stop()
+# Setting motor to neutral position (if applicable)
+neutral_signal = 1550  # Neutral position for many servos and ESCs
+neutral_pwm = microseconds_to_pwm(neutral_signal, 60)
+print("Setting motor to neutral")
+pwm.set_pwm(channel, 0, neutral_pwm)
+time.sleep(2)
 
-# Example usage
-if __name__ == "__main__":
-    try:
-        start_motor()
-        time.sleep(2)  # Wait for 2 seconds
-        print('Starting Test')
-        # Example: Set motor speed to mid-range
-        change_motor_speed(1500)
-        time.sleep(5)  # Wait for 2 seconds
-        
-        # Stop the motor
-        stop_motor()
-        
-    except KeyboardInterrupt:
-        print("Program stopped by User")
-    finally:
-        pwm.stop()
-        GPIO.cleanup()  # Clean up all GPIO
+
+# Example of setting motor to maximum position/speed
+print("Setting motor to maximum")
+pwm.set_pwm(channel, 0, max_pwm)
+time.sleep(2)
+
+# Setting motor to neutral position (if applicable)
+neutral_signal = 1550 # Neutral position for many servos and ESCs
+neutral_pwm = microseconds_to_pwm(neutral_signal, 60)
+print(neutral_pwm)
+print("Setting motor to neutral")
+pwm.set_pwm(channel, 0, neutral_pwm)
+time.sleep(2)
