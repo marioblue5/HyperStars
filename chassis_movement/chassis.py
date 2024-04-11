@@ -63,8 +63,8 @@ def chassis_move(speed):    #speed percent value
     motormove(MC3, 0, pwm_value)
     motormove(MC4, 0, pwm_value)
 
-# main loop here
-
+"""
+Left here in case we need
 start = default_timer()
     # data collection
         # move chassis forward slowly
@@ -81,4 +81,5 @@ start = default_timer()
 
 #cleanup?
 GPIO.cleanup()
+""" 
                     
