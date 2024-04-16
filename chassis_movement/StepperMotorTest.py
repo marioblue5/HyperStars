@@ -56,6 +56,7 @@ def move_stepmotor(direction, steps, delay=0.0005):
     for _ in range(steps):
         if GPIO.input(LIMIT_pin_1) == GPIO.LOW || GPIO.input(LIMIT_pin_2) == GPIO.LOW: 
             break
+        else
         GPIO.output(STEP_pin_1, GPIO.HIGH)
         GPIO.output(STEP_pin_2, GPIO.HIGH)
         time.sleep(delay)
