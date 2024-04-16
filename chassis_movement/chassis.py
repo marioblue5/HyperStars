@@ -1,11 +1,5 @@
 # some description of what the code does
-"""
-Movement of chassis Motors. 
-M1 = motor controller 1 --> left front wheels
-M2 = motor controller 2 --> right front wheels
-M3 = motor controller 3 --> left back wheels
-M4 = motor controller 4 --> right back wheels
-"""
+
 
 # Package imports
 import Adafruit_PCA9685
@@ -19,17 +13,11 @@ import time
 def microseconds_to_pwm(value, freq=60):
     return int((value / 1000000.0) * freq * 4096)
 
-# Initialize the PCA9685 using the default address
-pwm = Adafruit_PCA9685.PCA9685(busnum=1)
-
-# Set the PWM frequency to 60 Hz (good for servos)
-pwm.set_pwm_freq(60)
-
 #Intializing Motor Parameters
-MC1 = 0 
-MC2 = 1
-MC3 = 2
-MC4 = 3
+FL = 0 
+FR = 1
+BL = 2
+BR = 3
 
 # Define the signal values for 100%, 0%, and -100% speed respectively
 max_signal = 2050
@@ -51,17 +39,53 @@ def percent_to_pwm(percent):
 
     return int(pwm_value)
 
-# Motor Move Function
-def motor_move(controller, 0, speed):
-    pwm.set_pwm(controller, 0, speed)
+# Motor Move Function, Time in seconds
+def chassis_forward_backward(time,percent_speed):
+    for i in range(4):
+        pwm.set_pwm(i,0,percent_to_pwm(percent_speed))
+    time.sleep(time)
+    for i in range(4):
+        pwm.set_pwm(i,0,percent_to_pwm(stop_signal))
 
-# Move Chassis Function
-def chassis_move(speed):    #speed percent value
-    percent_to_pwm(speed)
-    motormove(MC1, 0, pwm_value)
-    motormove(MC2, 0, pwm_value)
-    motormove(MC3, 0, pwm_value)
-    motormove(MC4, 0, pwm_value)
+# Note! Left and right movement do not need a negative percent value, just use 
+# 0-100 as a magnitude 
+
+def chassis_move_left(duration,percent_speed):
+    # Diagonal Pair
+    pwm.set_pwm(0, 0,percent_to_pwm(abs(percent_speed)))
+    pwm.set_pwm(3,0,percent_to_pwm(abs(percent_speed)))
+    # Diagonal Pair
+    pwm.set_pwm(2,0,-percent_to_pwm(abs(percent_speed)))
+    pwm.set_pwm(4,0,-percent_to_pwm(abs(percent_speed)))
+    #Timer and Stop
+    time.sleep(duration)
+    for i in range(4):
+        pwm.set_pwm(i,0,percent_to_pwm(stop_signal))
+
+
+def chassis_move_right(duration, percent_speed):
+    percent_speed = abs(percent_speed)  # Ensuring non-negative speed
+
+    # Diagonal Pair
+    pwm.set_pwm(0, 0, -percent_to_pwm(abs(percent_speed)))
+    pwm.set_pwm(3, 0, -percent_to_pwm(abs(percent_speed)))
+    # Diagonal Pair
+    pwm.set_pwm(2, 0, percent_to_pwm(abs(percent_speed)))
+    pwm.set_pwm(4, 0, percent_to_pwm(abs(percent_speed)))
+    # Timer and Stop
+    time.sleep(duration)
+    for i in range(4):
+        pwm.set_pwm(i, 0, percent_to_pwm(stop_signal))
+
+
+
+# Initialize the PCA9685 using the default address
+pwm = Adafruit_PCA9685.PCA9685(busnum=1)
+
+# Set the PWM frequency to 60 Hz (good for servos)
+pwm.set_pwm_freq(60)
+
+
 
 """
 Left here in case we need
