@@ -55,8 +55,8 @@ def chassis_move_left(duration,percent_speed):
     pwm.set_pwm(0, 0,percent_to_pwm(abs(percent_speed)))
     pwm.set_pwm(3,0,percent_to_pwm(abs(percent_speed)))
     # Diagonal Pair
-    pwm.set_pwm(2,0,percent_to_pwm(abs(-percent_speed)))
-    pwm.set_pwm(4,0,percent_to_pwm(abs(-percent_speed)))
+    pwm.set_pwm(2,0,percent_to_pwm(-abs(percent_speed)))
+    pwm.set_pwm(4,0,percent_to_pwm(-abs(percent_speed)))
     #Timer and Stop
     time.sleep(duration)
     for i in range(4):
@@ -67,8 +67,8 @@ def chassis_move_right(duration, percent_speed):
     percent_speed = abs(percent_speed)  # Ensuring non-negative speed
 
     # Diagonal Pair
-    pwm.set_pwm(0, 0, percent_to_pwm(abs(-percent_speed)))
-    pwm.set_pwm(3, 0, percent_to_pwm(abs(-percent_speed)))
+    pwm.set_pwm(0, 0, percent_to_pwm(-abs(percent_speed)))
+    pwm.set_pwm(3, 0, percent_to_pwm(-abs(percent_speed)))
     # Diagonal Pair
     pwm.set_pwm(2, 0, percent_to_pwm(abs(percent_speed)))
     pwm.set_pwm(4, 0, percent_to_pwm(abs(percent_speed)))
