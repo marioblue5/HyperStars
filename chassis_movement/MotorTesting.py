@@ -12,7 +12,7 @@ pwm = Adafruit_PCA9685.PCA9685(busnum=1)
 pwm.set_pwm_freq(60)
 
 # Motor control parameters
-channel = 7  # Adjust based on your connection
+channel = 0  # Adjust based on your connection
 min_signal = 1050  # Minimum pulse length out of 4096
 max_signal = 2050  # Maximum pulse length out of 4096
 
@@ -22,28 +22,41 @@ max_pwm = microseconds_to_pwm(max_signal, 60)
 print(min_pwm)
 print(max_pwm)
 
+neutral_signal = 1550  # Neutral position for many servos and ESCs
+neutral_pwm = microseconds_to_pwm(neutral_signal, 60)
+print("Setting motor to neutral")
+for i in range(4):
+        pwm.set_pwm(i, 0, neutral_pwm)
+
+time.sleep(1)
+
 # Example of setting motor to minimum position/speed
 print("Setting motor to minimum")
-pwm.set_pwm(channel, 0, min_pwm)
-time.sleep(2)
+for i in range(4):
+        pwm.set_pwm(i, 0, min_pwm)
+time.sleep(4)
 
 # Setting motor to neutral position (if applicable)
 neutral_signal = 1550  # Neutral position for many servos and ESCs
 neutral_pwm = microseconds_to_pwm(neutral_signal, 60)
 print("Setting motor to neutral")
-pwm.set_pwm(channel, 0, neutral_pwm)
-time.sleep(2)
+for i in range(4):
+        pwm.set_pwm(i, 0, neutral_pwm)
+
+time.sleep(4)
 
 
 # Example of setting motor to maximum position/speed
 print("Setting motor to maximum")
-pwm.set_pwm(channel, 0, max_pwm)
-time.sleep(2)
+for i in range(4):
+        pwm.set_pwm(i, 0, max_pwm)
+time.sleep(4)
 
 # Setting motor to neutral position (if applicable)
 neutral_signal = 1550 # Neutral position for many servos and ESCs
 neutral_pwm = microseconds_to_pwm(neutral_signal, 60)
 print(neutral_pwm)
 print("Setting motor to neutral")
-pwm.set_pwm(channel, 0, neutral_pwm)
-time.sleep(2)
+for i in range(4):
+        pwm.set_pwm(i, 0, neutral_pwm)
+time.sleep(1)
