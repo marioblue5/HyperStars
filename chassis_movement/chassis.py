@@ -143,9 +143,7 @@ pwm = Adafruit_PCA9685.PCA9685(busnum=1)
 pwm.set_pwm_freq(60)
 
 if __name__ == '__main__':
-      chassis_forward_backward(5,25)
-      chassis_move_left(10,25)
-      chassis_move_right(10,25)
+      chassis_forward_backward(10,25)
 
 
 """
