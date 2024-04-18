@@ -108,7 +108,58 @@ def chassis_move_left(duration,percent_speed):
         pwm.set_pwm(1,0,percent_to_pwm(abs(i)))
         pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
         time.sleep(ramping_time/ramp_down.size)
+def chassis_rotate_cw(duration,percent_speed):
+    # Diagonal Pair
+    ramp_up,ramp_down = ramping(percent_speed)
 
+    # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
+
+    ramping_time = 0.2*duration
+
+    # Starting ramp up
+    for i in ramp_up:
+        pwm.set_pwm(1, 0,percent_to_pwm(-abs(i)))
+        pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
+        # Diagonal Pair
+        pwm.set_pwm(0,0,percent_to_pwm(abs(i)))
+        pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
+        time.sleep(ramping_time/ramp_up.size)
+    time.sleep(duration*0.6)
+    # Starting ramp down
+    for i in ramp_down:
+        pwm.set_pwm(1, 0,percent_to_pwm(-abs(i)))
+        pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
+        # Diagonal Pair
+        pwm.set_pwm(0,0,percent_to_pwm(abs(i)))
+        pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
+        time.sleep(ramping_time/ramp_down.size)
+
+def chassis_rotate_ccw(duration,percent_speed):
+    # Diagonal Pair
+    ramp_up,ramp_down = ramping(percent_speed)
+
+    # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
+
+    ramping_time = 0.2*duration
+
+    # Starting ramp up
+    for i in ramp_up:
+        pwm.set_pwm(1, 0,percent_to_pwm(abs(i)))
+        pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
+        # Diagonal Pair
+        pwm.set_pwm(0,0,percent_to_pwm(-abs(i)))
+        pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
+        time.sleep(ramping_time/ramp_up.size)
+    time.sleep(duration*0.6)
+    # Starting ramp down
+    for i in ramp_down:
+        pwm.set_pwm(1, 0,percent_to_pwm(abs(i)))
+        pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
+        # Diagonal Pair
+        pwm.set_pwm(0,0,percent_to_pwm(-abs(i)))
+        pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
+        time.sleep(ramping_time/ramp_down.size)
+    
 def chassis_move_right(duration, percent_speed):
     # Diagonal Pair
     ramp_up,ramp_down = ramping(percent_speed)
@@ -187,7 +238,7 @@ pwm.set_pwm_freq(60)
 if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
-        thread1 = threading.Thread(target=chassis_forward_backward,args=(5,25))
+        thread1 = threading.Thread(target=chassis_rotate_cw,args=(5,20))
         thread2 = threading.Thread(target=move_stepmotor,args=(True,steps))
         thread1.start()
         thread2.start()
