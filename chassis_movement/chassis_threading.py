@@ -238,7 +238,7 @@ pwm.set_pwm_freq(60)
 if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
-        thread1 = threading.Thread(target=chassis_rotate_cw,args=(20,25))
+        thread1 = threading.Thread(target=chassis_move_left,args=(10,25))
         thread2 = threading.Thread(target=move_stepmotor,args=(True,steps))
         thread1.start()
         thread2.start()
