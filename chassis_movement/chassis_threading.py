@@ -244,9 +244,11 @@ if __name__ == '__main__':
         thread2.start()
         
         thread1.join()
+        chassis_move_right(10,25)
         thread2.join()
         time.sleep(2)
         move_stepmotor(False, steps)  # Move backward
+        
     finally:
         GPIO.cleanup()
 
