@@ -135,7 +135,7 @@ def chassis_move_right(duration, percent_speed):
         time.sleep(ramping_time/ramp_down.size)
 # Stepper Motors!!!!
 
-def move_stepmotor(direction, steps, delay=0.0005):
+def move_stepmotor(direction, steps, delay=0.001):
     """
     Moves the motor in the specified direction for a number of steps.
     :param direction: Direction to rotate (True for one way, False for the reverse).
