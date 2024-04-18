@@ -136,7 +136,7 @@ def chassis_move_right(duration, percent_speed):
         time.sleep(ramping_time/ramp_down.size)
 # Stepper Motors!!!!
 
-def move_stepmotor(direction, steps, delay=0.0005):
+def move_stepmotor(direction, steps, delay=0.001):
     """
     Moves the motor in the specified direction for a number of steps.
     :param direction: Direction to rotate (True for one way, False for the reverse).
@@ -187,8 +187,8 @@ pwm.set_pwm_freq(60)
 if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
-        thread1 = threading.Thread(target=chassis_forward_backward(5,25))
-        thread2 = threading.Thread(target=move_stepmotor(True,steps))
+        thread1 = threading.Thread(target=chassis_forward_backward,args=(5,25))
+        thread2 = threading.Thread(target=move_stepmotor,args=(True,steps))
         thread1.start()
         thread2.start()
         
