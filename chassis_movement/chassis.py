@@ -184,7 +184,7 @@ pwm.set_pwm_freq(60)
 
 if __name__ == '__main__':
     try:
-        chassis_forward_backward(5,25)
+        chassis_forward_backward(5,15)
         steps = steps_per_revolution * 1  # Change "1" to adjust the number of revolutions
         move_stepmotor(True, steps)  # Move forward
         time.sleep(2)  # Wait for 2 seconds
