@@ -189,7 +189,9 @@ if __name__ == '__main__':
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
         thread1 = threading.Thread(target=chassis_forward_backward(5,25))
         thread2 = threading.Thread(target=move_stepmotor(True,steps))
-
+        thread1.start()
+        thread2.start()
+        
         thread1.join()
         thread2.join()
         time.sleep(2)
