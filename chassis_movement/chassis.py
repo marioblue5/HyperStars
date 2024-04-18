@@ -6,7 +6,7 @@ import Adafruit_PCA9685
 import time
 import numpy as np
     # import serial
-    # import Jetson.GPIO as GPIO
+import Jetson.GPIO as GPIO
     # from timeit import default_timer
 
 # Initialization
@@ -133,8 +133,48 @@ def chassis_move_right(duration, percent_speed):
         pwm.set_pwm(1,0,percent_to_pwm(-abs(i)))
         pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
         time.sleep(ramping_time/ramp_down.size)
+# Stepper Motors!!!!
+
+def move_stepmotor(direction, steps, delay=0.0005):
+    """
+    Moves the motor in the specified direction for a number of steps.
+    :param direction: Direction to rotate (True for one way, False for the reverse).
+    :param steps: Number of steps to move.
+    :param delay: Delay between steps in seconds.
+    """
+    GPIO.output(DIR_pin, direction)
+    for _ in range(steps):
+        #if GPIO.input(LIMIT_pin_1) == GPIO.LOW || GPIO.input(LIMIT_pin_2) == GPIO.LOW: 
+         #   break
+        #else
+        GPIO.output(STEP_pin_L, GPIO.HIGH)
+        GPIO.output(STEP_pin_R, GPIO.HIGH)
+        time.sleep(delay)
+        GPIO.output(STEP_pin_L, GPIO.LOW)
+        GPIO.output(STEP_pin_R, GPIO.LOW)
+        time.sleep(delay)
+
+# Pins
+DIR_pin_L = 21  # Direction pin
+STEP_pin_L = 22  # Step pin
+#LIMIT_pin_1 = 22 # Limit Switch Pin
+
+DIR_pin_R = 23
+STEP_pin_R = 24
+#LIMIT_pin_2 = 23
+
+# Motor setup
+steps_per_revolution = 2000
 
 
+# Initialize GPIO
+GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
+
+GPIO.setup(DIR_pin_L, GPIO.OUT)
+GPIO.setup(DIR_pin_R, GPIO.OUT)
+
+GPIO.setup(STEP_pin_L, GPIO.OUT)
+GPIO.setup(STEP_pin_R, GPIO.OUT)
 
 # Initialize the PCA9685 using the default address
 pwm = Adafruit_PCA9685.PCA9685(busnum=1)
@@ -143,8 +183,14 @@ pwm = Adafruit_PCA9685.PCA9685(busnum=1)
 pwm.set_pwm_freq(60)
 
 if __name__ == '__main__':
-      chassis_forward_backward(5,25)
-
+    try:
+        chassis_forward_backward(5,25)
+        steps = steps_per_revolution * 1  # Change "1" to adjust the number of revolutions
+        move_stepmotor(True, steps)  # Move forward
+        time.sleep(2)  # Wait for 2 seconds
+        move_stepmotor(False, steps)  # Move backward
+    finally:
+        GPIO.cleanup()
 
 """
 Left here in case we need
