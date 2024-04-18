@@ -142,7 +142,8 @@ def move_stepmotor(direction, steps, delay=0.0005):
     :param steps: Number of steps to move.
     :param delay: Delay between steps in seconds.
     """
-    GPIO.output(DIR_pin, direction)
+    GPIO.output(DIR_pin_L, direction)
+    GPIO.output(DIR_pin_R, direction)
     for _ in range(steps):
         #if GPIO.input(LIMIT_pin_1) == GPIO.LOW || GPIO.input(LIMIT_pin_2) == GPIO.LOW: 
          #   break
