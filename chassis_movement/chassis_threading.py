@@ -5,6 +5,7 @@
 import Adafruit_PCA9685
 import time
 import numpy as np
+import threading
     # import serial
 import Jetson.GPIO as GPIO
     # from timeit import default_timer
@@ -184,10 +185,13 @@ pwm.set_pwm_freq(60)
 
 if __name__ == '__main__':
     try:
-        chassis_forward_backward(5,25)
         steps = steps_per_revolution * 1  # Change "1" to adjust the number of revolutions
-        move_stepmotor(True, steps)  # Move forward
-        time.sleep(2)  # Wait for 2 seconds
+        thread1 = threading.Thread(target=chassis_forward_backward(5,25))
+        thread2 = threading.Thread(target=move_stepmotor(True,steps))
+
+        thread1.join()
+        thread2.join()
+        time.sleep(2)
         move_stepmotor(False, steps)  # Move backward
     finally:
         GPIO.cleanup()
