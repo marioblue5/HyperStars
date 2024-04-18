@@ -143,7 +143,8 @@ def move_stepmotor(direction, steps, delay=0.0005):
     :param steps: Number of steps to move.
     :param delay: Delay between steps in seconds.
     """
-    GPIO.output(DIR_pin, direction)
+    GPIO.output(DIR_pin_L, direction)
+    GPIO.output(DIR_pin_R, not direction)
     for _ in range(steps):
         #if GPIO.input(LIMIT_pin_1) == GPIO.LOW || GPIO.input(LIMIT_pin_2) == GPIO.LOW: 
          #   break
@@ -185,7 +186,7 @@ pwm.set_pwm_freq(60)
 
 if __name__ == '__main__':
     try:
-        steps = steps_per_revolution * 1  # Change "1" to adjust the number of revolutions
+        steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
         thread1 = threading.Thread(target=chassis_forward_backward(5,25))
         thread2 = threading.Thread(target=move_stepmotor(True,steps))
 
