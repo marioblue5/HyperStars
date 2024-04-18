@@ -238,13 +238,13 @@ pwm.set_pwm_freq(60)
 if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
-        thread1 = threading.Thread(target=chassis_forward_backward,args=(10,10))
+        thread1 = threading.Thread(target=chassis_forward_backward,args=(8,25))
         thread2 = threading.Thread(target=move_stepmotor,args=(True,steps))
         thread1.start()
         thread2.start()
         
         thread1.join()
-        chassis_forward_backward(10,-10)
+        chassis_forward_backward(10,-25)
         thread2.join()
         time.sleep(2)
         move_stepmotor(False, steps)  # Move backward
