@@ -279,7 +279,7 @@ def start_capture():
         directories = ["Camera_1", "Camera_2", "Camera_3"]
 
         # Capture 100 frames from each camera
-        for i in range(600):
+        for i in range(90):
             for pipeline, directory in zip(pipelines, directories):
                 capture_frame(pipeline, directory, i)
 
@@ -320,7 +320,7 @@ pwm.set_pwm_freq(60)
 if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
-        thread1 = threading.Thread(target=chassis_forward_backward,args=(8,15))
+        thread1 = threading.Thread(target=chassis_forward_backward,args=(15,15))
         thread2 = threading.Thread(target=start_capture)
         thread1.start()
         thread2.start()
