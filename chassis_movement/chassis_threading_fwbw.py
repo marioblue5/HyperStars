@@ -2,6 +2,10 @@
 
 
 # Package imports
+import pyrealsense2 as rs
+import cv2
+import os
+import json
 import Adafruit_PCA9685
 import time
 import numpy as np
@@ -206,7 +210,85 @@ def move_stepmotor(direction, steps, delay=0.001):
         GPIO.output(STEP_pin_L, GPIO.LOW)
         GPIO.output(STEP_pin_R, GPIO.LOW)
         time.sleep(delay)
+# Function to create a folder if it doesn't exist
+def ensure_folder(folder):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
+# Function to setup each camera
+def setup_camera(serial_number):
+    pipeline = rs.pipeline()
+    config = rs.config()
+    config.enable_device(serial_number)
+    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+    config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 30)
+    pipeline.start(config)
+    return pipeline
+
+# Function to save camera intrinsics to a JSON file
+def save_intrinsic_as_json(filename, frame):
+    intrinsics = frame.profile.as_video_stream_profile().intrinsics
+    with open(filename, 'w') as outfile:
+        json.dump(
+            {
+                'width': intrinsics.width,
+                'height': intrinsics.height,
+                'intrinsic_matrix': [
+                    intrinsics.fx, 0, 0,
+                    0, intrinsics.fy, 0,
+                    intrinsics.ppx, intrinsics.ppy, 1
+                ]
+            },
+            outfile,
+            indent=4
+        )
+
+# Function to capture and save a frame from each camera
+def capture_frame(pipeline, folder_name, frame_number):
+    ensure_folder(folder_name)
+    frames = pipeline.wait_for_frames()
+    depth_frame = frames.get_depth_frame()
+    color_frame = frames.get_color_frame()
+    if not depth_frame or not color_frame:
+        return False
+    
+    # Save intrinsics
+    save_intrinsic_as_json(f"{folder_name}/intrinsics.json", color_frame)
+    
+    # Save images
+    depth_image = np.asanyarray(depth_frame.get_data())
+    color_image = np.asanyarray(color_frame.get_data())
+    cv2.imwrite(f"{folder_name}/depth-{frame_number}.png", depth_image)
+    cv2.imwrite(f"{folder_name}/color-{frame_number}.jpg", color_image)
+    return True
+
+def start_capture():
+    try:
+        # Find connected devices
+        context = rs.context()
+        devices = context.query_devices()
+        serial_numbers = [device.get_info(rs.camera_info.serial_number) for device in devices]
+
+        if len(serial_numbers) < 3:
+            raise ValueError("Three D405 cameras are not connected")
+
+        # Setup pipelines for each camera
+        pipelines = [setup_camera(sn) for sn in serial_numbers]
+
+        # Directory names for each camera
+        directories = ["Camera_1", "Camera_2", "Camera_3"]
+
+        # Capture 100 frames from each camera
+        for i in range(600):
+            for pipeline, directory in zip(pipelines, directories):
+                capture_frame(pipeline, directory, i)
+
+    finally:
+        # Stop all pipelines
+        for pipeline in pipelines:
+            pipeline.stop()
+
+    print("Image capture and intrinsics saving completed for all cameras.")
 # Pins
 DIR_pin_L = 21  # Direction pin
 STEP_pin_L = 22  # Step pin
@@ -238,16 +320,15 @@ pwm.set_pwm_freq(60)
 if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
-        thread1 = threading.Thread(target=chassis_forward_backward,args=(8,25))
-        thread2 = threading.Thread(target=move_stepmotor,args=(True,steps))
+        thread1 = threading.Thread(target=chassis_forward_backward,args=(8,15))
+        thread2 = threading.Thread(target=start_capture)
         thread1.start()
         thread2.start()
         
         thread1.join()
-        chassis_forward_backward(10,-25)
         thread2.join()
         time.sleep(2)
-        move_stepmotor(False, steps)  # Move backward
+        # move_stepmotor(False, steps)  # Move backward
         
     finally:
         GPIO.cleanup()
