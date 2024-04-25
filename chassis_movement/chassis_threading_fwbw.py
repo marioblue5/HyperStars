@@ -331,6 +331,9 @@ if __name__ == '__main__':
         # thread2.join()
         time.sleep(2)
         # move_stepmotor(False, steps)  # Move backward
+        print(" If motors did not stop by now then ramp down function is busted :(")
+        for j in range(4):
+             pwm.set_pwm(j,0,percent_to_pwm(0))
         
     finally:
         GPIO.cleanup()
