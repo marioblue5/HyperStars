@@ -71,18 +71,20 @@ def chassis_forward_backward(duration,percent_speed):
     ramping_time = 0.2*duration
 
     # Starting ramp up
-    for i in ramp_up:
-        for j in range(4):
-            pwm.set_pwm(j,0,percent_to_pwm(i))
-        if i == 0:
-            time.sleep(1)
-        time.sleep(ramping_time/ramp_up.size)
+    # for i in ramp_up:
+    #     for j in range(4):
+    #         pwm.set_pwm(j,0,percent_to_pwm(i))
+    #     if i == 0:
+    #         time.sleep(1)
+    #     time.sleep(ramping_time/ramp_up.size)
     time.sleep(duration*0.6)
+    for j in range(4):
+             pwm.set_pwm(j,0,percent_to_pwm(percent_speed))
     # Starting ramp down
-    for i in ramp_down:
-        for j in range(4):
-            pwm.set_pwm(j,0,percent_to_pwm(i))
-        time.sleep(ramping_time/ramp_down.size)
+    # for i in ramp_down:
+    #     for j in range(4):
+    #         pwm.set_pwm(j,0,percent_to_pwm(i))
+    #     time.sleep(ramping_time/ramp_down.size)
 
 # Note! Left and right movement do not need a negative percent value, just use 
 # 0-100 as a magnitude 
@@ -321,12 +323,12 @@ if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
         thread1 = threading.Thread(target=chassis_forward_backward,args=(15,15))
-        thread2 = threading.Thread(target=start_capture)
+        # thread2 = threading.Thread(target=start_capture)
         thread1.start()
-        thread2.start()
+        # thread2.start()
         
         thread1.join()
-        thread2.join()
+        # thread2.join()
         time.sleep(2)
         # move_stepmotor(False, steps)  # Move backward
         
