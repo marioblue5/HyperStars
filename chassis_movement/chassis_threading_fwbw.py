@@ -30,7 +30,7 @@ min_signal = 1050
 
 def ramping(percent_speed):
     # Calculate number of steps for each half of the ramp
-    intervals = 10
+    intervals = 3
 
     # Create an increasing ramp from 0 to percent_speed
     increasing_ramp = np.linspace(0, percent_speed, num=intervals, endpoint=True)
@@ -77,14 +77,14 @@ def chassis_forward_backward(duration,percent_speed):
     #     if i == 0:
     #         time.sleep(1)
     #     time.sleep(ramping_time/ramp_up.size)
-    time.sleep(duration*0.6)
     for j in range(4):
              pwm.set_pwm(j,0,percent_to_pwm(percent_speed))
+    time.sleep(duration*0.6)
     # Starting ramp down
-    # for i in ramp_down:
-    #     for j in range(4):
-    #         pwm.set_pwm(j,0,percent_to_pwm(i))
-    #     time.sleep(ramping_time/ramp_down.size)
+    for i in ramp_down:
+        for j in range(4):
+            pwm.set_pwm(j,0,percent_to_pwm(i))
+        time.sleep(ramping_time/ramp_down.size)
 
 # Note! Left and right movement do not need a negative percent value, just use 
 # 0-100 as a magnitude 
