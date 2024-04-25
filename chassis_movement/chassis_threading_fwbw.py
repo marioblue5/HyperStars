@@ -322,16 +322,19 @@ pwm.set_pwm_freq(60)
 if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
-        thread1 = threading.Thread(target=chassis_forward_backward,args=(8,15))
-        thread2 = threading.Thread(target=start_capture)
+        thread1 = threading.Thread(target=chassis_forward_backward,args=(10,15))
+        # thread2 = threading.Thread(target=start_capture)
         thread1.start()
-        thread2.start()
+        # thread2.start()
         
         thread1.join()
         # thread2.join()
-        time.sleep(2)
         # move_stepmotor(False, steps)  # Move backward
         print(" If motors did not stop by now then ramp down function is busted :(")
+        for j in range(4):
+             pwm.set_pwm(j,0,percent_to_pwm(0))
+        chassis_forward_backward(10,-15)
+        time.sleep(1)
         for j in range(4):
              pwm.set_pwm(j,0,percent_to_pwm(0))
         
