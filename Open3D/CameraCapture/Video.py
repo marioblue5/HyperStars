@@ -2,13 +2,14 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import os
+import json
 
-# Function to create folder if it doesn't exist
+# Function to create a folder if it doesn't exist
 def ensure_folder(folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-# Setting up each camera
+# Function to setup each camera
 def setup_camera(serial_number):
     pipeline = rs.pipeline()
     config = rs.config()
@@ -18,15 +19,41 @@ def setup_camera(serial_number):
     pipeline.start(config)
     return pipeline
 
-# Capture and save a frame from each camera
+# Function to save camera intrinsics to a JSON file
+def save_intrinsic_as_json(filename, frame):
+    intrinsics = frame.profile.as_video_stream_profile().intrinsics
+    with open(filename, 'w') as outfile:
+        json.dump(
+            {
+                'width': intrinsics.width,
+                'height': intrinsics.height,
+                'intrinsic_matrix': [
+                    intrinsics.fx, 0, 0,
+                    0, intrinsics.fy, 0,
+                    intrinsics.ppx, intrinsics.ppy, 1
+                ]
+            },
+            outfile,
+            indent=4
+        )
+
+# Function to capture and save a frame from each camera
 def capture_frame(pipeline, folder_name, frame_number):
     ensure_folder(folder_name)
     frames = pipeline.wait_for_frames()
+    depth_frame = frames.get_depth_frame()
     color_frame = frames.get_color_frame()
-    if not color_frame:
+    if not depth_frame or not color_frame:
         return False
+    
+    # Save intrinsics
+    save_intrinsic_as_json(f"{folder_name}/intrinsics.json", color_frame)
+    
+    # Save images
+    depth_image = np.asanyarray(depth_frame.get_data())
     color_image = np.asanyarray(color_frame.get_data())
-    cv2.imwrite(f"{folder_name}/frame-{frame_number}.jpg", color_image)
+    cv2.imwrite(f"{folder_name}/depth-{frame_number}.png", depth_image)
+    cv2.imwrite(f"{folder_name}/color-{frame_number}.jpg", color_image)
     return True
 
 try:
@@ -54,4 +81,4 @@ finally:
     for pipeline in pipelines:
         pipeline.stop()
 
-print("Image capture completed for all cameras.")
+print("Image capture and intrinsics saving completed for all cameras.")
