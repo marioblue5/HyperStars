@@ -74,6 +74,8 @@ def chassis_forward_backward(duration,percent_speed):
     for i in ramp_up:
         for j in range(4):
             pwm.set_pwm(j,0,percent_to_pwm(i))
+        if i == 0:
+            time.sleep(1)
         time.sleep(ramping_time/ramp_up.size)
     time.sleep(duration*0.6)
     # Starting ramp down
