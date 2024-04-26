@@ -323,8 +323,12 @@ if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
         thread1 = threading.Thread(target=chassis_forward_backward,args=(10,15))
+        thread2 = threading.Thread(target=start_capture)
+        time.sleep(1)
+        thread2.start()
+        time.sleep(1)
         thread1.start()
-        start_capture()
+        time.sleep(1)
         
         thread1.join()
         # move_stepmotor(False, steps)  # Move backward
@@ -335,7 +339,7 @@ if __name__ == '__main__':
         time.sleep(1)
         for j in range(4):
              pwm.set_pwm(j,0,percent_to_pwm(0))
-        
+        thread2.join()
     finally:
         GPIO.cleanup()
 
