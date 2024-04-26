@@ -77,8 +77,10 @@ def chassis_forward_backward(duration,percent_speed):
     #     if i == 0:
     #         time.sleep(1)
     #     time.sleep(ramping_time/ramp_up.size)
-    for j in range(4):
-             pwm.set_pwm(j,0,percent_to_pwm(percent_speed))
+    pwm.set_pwm(0,0,percent_to_pwm(percent_speed))
+    pwm.set_pwm(1,0,percent_to_pwm(percent_speed*0.866))
+    pwm.set_pwm(2,0,percent_to_pwm(percent_speed))
+    pwm.set_pwm(3,0,percent_to_pwm(percent_speed-0.866))
     time.sleep(duration*0.6)
     # Starting ramp down
     for i in ramp_down:
@@ -222,8 +224,8 @@ def setup_camera(serial_number):
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_device(serial_number)
-    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
-    config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
+    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+    config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 30)
     pipeline.start(config)
     return pipeline
 
@@ -281,7 +283,7 @@ def start_capture():
         directories = ["Camera_1", "Camera_2", "Camera_3"]
 
         # Capture 100 frames from each camera
-        for i in range(180):
+        for i in range(90):
             for pipeline, directory in zip(pipelines, directories):
                 capture_frame(pipeline, directory, i)
 
