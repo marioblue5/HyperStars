@@ -80,8 +80,8 @@ def chassis_forward_backward(duration,percent_speed):
     pwm.set_pwm(0,0,percent_to_pwm(percent_speed))
     pwm.set_pwm(1,0,percent_to_pwm(percent_speed*0.866))
     pwm.set_pwm(2,0,percent_to_pwm(percent_speed))
-    pwm.set_pwm(3,0,percent_to_pwm(percent_speed-0.866))
-    time.sleep(duration*0.6)
+    pwm.set_pwm(3,0,percent_to_pwm(percent_speed*0.866))
+    time.sleep(duration)
     # Starting ramp down
     for i in ramp_down:
         for j in range(4):
