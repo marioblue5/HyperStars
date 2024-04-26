@@ -323,8 +323,8 @@ if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
         thread1 = threading.Thread(target=chassis_forward_backward,args=(10,15))
-        start_capture()
         thread1.start()
+        start_capture()
         
         thread1.join()
         # move_stepmotor(False, steps)  # Move backward
