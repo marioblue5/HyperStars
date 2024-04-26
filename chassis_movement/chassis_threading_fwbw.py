@@ -222,8 +222,8 @@ def setup_camera(serial_number):
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_device(serial_number)
-    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
-    config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 30)
+    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
+    config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
     pipeline.start(config)
     return pipeline
 
@@ -281,7 +281,7 @@ def start_capture():
         directories = ["Camera_1", "Camera_2", "Camera_3"]
 
         # Capture 100 frames from each camera
-        for i in range(90):
+        for i in range(180):
             for pipeline, directory in zip(pipelines, directories):
                 capture_frame(pipeline, directory, i)
 
@@ -322,7 +322,7 @@ pwm.set_pwm_freq(60)
 if __name__ == '__main__':
     try:
         steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
-        thread1 = threading.Thread(target=chassis_forward_backward,args=(10,15))
+        thread1 = threading.Thread(target=chassis_forward_backward,args=(12,15))
         thread2 = threading.Thread(target=start_capture)
         time.sleep(1)
         thread2.start()
@@ -335,7 +335,7 @@ if __name__ == '__main__':
         print(" If motors did not stop by now then ramp down function is busted :(")
         for j in range(4):
              pwm.set_pwm(j,0,percent_to_pwm(0))
-        chassis_forward_backward(10,-20)
+        chassis_forward_backward(12,-20)
         time.sleep(1)
         for j in range(4):
              pwm.set_pwm(j,0,percent_to_pwm(0))
