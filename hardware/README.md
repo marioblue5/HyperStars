@@ -1,0 +1,3 @@
+OnShape (a web browser based CAD software) was utilized in this projection for the ease of communicating ideas. Attached is the link to the goBilda OnShape file which contains all the relevant dimensions, linked part numbers, and any other hardware you may require.
+If you would like access to the OnShape library (for importing already CAD'd parts), make sure to reach out to the FTC/FRC team organization for OnShape and they should respond in 1 week with an invite to the library.
+Stella's MKI CAD: https://cad.onshape.com/documents/cff78cc3b20cde56c189067d/w/8fa4ef9faf2673e0e9df7fa9/e/c461c2ffbe2e3d06f3b5913c?renderMode=0&uiState=662e9a312cda6a0342c3254e
