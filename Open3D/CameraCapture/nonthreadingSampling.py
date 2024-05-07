@@ -17,45 +17,50 @@ def setup_camera(serial_number):
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_device(serial_number)
-    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
-    config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
+    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+    config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 30)
     pipeline.start(config)
     return pipeline
 
+def capture_frames(pipeline, device_id, output_folder, num_frames=150):
+    """Capture a number of frames from a camera and save them to disk."""
+    for i in range(num_frames):
+        frames = pipeline.wait_for_frames()
+        depth_frame = frames.get_depth_frame()
+        color_frame = frames.get_color_frame()
+        if not depth_frame or not color_frame:
+            continue
+
+        depth_image = np.asanyarray(depth_frame.get_data())
+        color_image = np.asanyarray(color_frame.get_data())
+        save_image(os.path.join(output_folder, f'depth_{i}.png'), depth_image)
+        save_image(os.path.join(output_folder, f'color_{i}.jpg'), color_image, is_color=True)
+
 def main():
-    # Ensure output directory exists
-    if not os.path.exists('output'):
-        os.mkdir('output')
+    # Ensure the output directories exist
+    base_dir = 'output'
+    if not os.path.exists(base_dir):
+        os.mkdir(base_dir)
+
+    directories = ['1', '2', '3']  # Folder names for each camera
+    for d in directories:
+        if not os.path.exists(os.path.join(base_dir, d)):
+            os.mkdir(os.path.join(base_dir, d))
 
     # Initialize RealSense context
     context = rs.context()
     devices = context.query_devices()
-    serial_numbers = [device.get_info(rs.camera_info.serial_number) for device in devices]
+    if len(devices) < 3:
+        raise ValueError("Three cameras are required but only found " + str(len(devices)))
 
-    if len(serial_numbers) < 3:
-        raise ValueError("Three cameras are required but only found " + str(len(serial_numbers)))
+    # Set up cameras and capture frames
+    for index, device in enumerate(devices):
+        serial_number = device.get_info(rs.camera_info.serial_number)
+        pipeline = setup_camera(serial_number)
+        capture_frames(pipeline, serial_number, os.path.join(base_dir, directories[index]))
 
-    # Set up cameras
-    pipelines = [setup_camera(sn) for sn in serial_numbers]
-    try:
-        num_frames = 150
-        for i in range(num_frames):
-            for index, pipeline in enumerate(pipelines):
-                frames = pipeline.wait_for_frames()
-                depth_frame = frames.get_depth_frame()
-                color_frame = frames.get_color_frame()
-                if not depth_frame or not color_frame:
-                    continue
-
-                # Save the frames
-                depth_image = np.asanyarray(depth_frame.get_data())
-                color_image = np.asanyarray(color_frame.get_data())
-                save_image(f'output/depth_{serial_numbers[index]}_{i}.png', depth_image)
-                save_image(f'output/color_{serial_numbers[index]}_{i}.jpg', color_image, is_color=True)
-
-    finally:
-        for pipeline in pipelines:
-            pipeline.stop()
+        # Stop the pipeline after capturing the frames
+        pipeline.stop()
 
 if __name__ == "__main__":
     main()
