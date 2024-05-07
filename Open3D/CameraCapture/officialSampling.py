@@ -38,6 +38,19 @@ def setup_camera(serial_number):
 def camera_pipeline(pipeline, directory):
     """Capture, process, and save images from a single camera."""
     frame_counter = 0
+    # Filters
+    depth_to_disparity = rs.disparity_transform(True)
+    disparity_to_depth = rs.disparity_transform(False)
+    spatial = rs.spatial_filter()
+    temporal = rs.temporal_filter()
+    # Set default values for spatial filter
+    spatial.set_option(rs.option.filter_magnitude, 2)
+    spatial.set_option(rs.option.filter_smooth_alpha, 0.6)
+    spatial.set_option(rs.option.filter_smooth_delta, 50)
+    # Set default values for temporal filter
+    temporal.set_option(rs.option.filter_smooth_alpha, 1)
+    temporal.set_option(rs.option.filter_smooth_delta, 20)
+    temporal.set_option(rs.option.holes_fill, 2)
     try:
         while True:
             # Wait for a coherent pair of frames: depth and color
