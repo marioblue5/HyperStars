@@ -84,6 +84,10 @@ def camera_pipeline(pipeline, directory):
 
             # Increment frame counter
             frame_counter += 1
+            print(f" {directory} is at {frame_counter} out of 150")
+            if frame_counter >= 150:
+                print(f"Reached 150 frames for {directory}. Stopping capture.")
+                break
     finally:
         pipeline.stop()
 
