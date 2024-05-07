@@ -17,8 +17,8 @@ def setup_camera(serial_number):
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_device(serial_number)
-    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
-    config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 30)
+    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
+    config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
     pipeline.start(config)
     return pipeline
 
