@@ -38,7 +38,7 @@ def capture_frames(pipeline, device_id, output_folder, num_frames=180):
 
 def main():
     # Ensure the output directories exist
-    base_dir = 'abc_output'
+    base_dir = 'def_output'
     if not os.path.exists(base_dir):
         os.mkdir(base_dir)
 
