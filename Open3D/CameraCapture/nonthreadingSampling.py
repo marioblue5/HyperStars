@@ -9,8 +9,7 @@ def save_image(filename, image, is_color=False):
         cv2.imwrite(filename, image)  # Save color image directly
     else:
         # Convert depth image to color map for better visualization
-        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(image, alpha=0.09), cv2.COLORMAP_JET)
-        cv2.imwrite(filename, depth_colormap)
+        cv2.imwrite(filename, image)
 
 def setup_camera(serial_number):
     """Set up and return a RealSense pipeline for a given serial number."""
