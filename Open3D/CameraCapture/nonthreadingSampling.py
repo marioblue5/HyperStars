@@ -38,7 +38,7 @@ def main():
     # Set up cameras
     pipelines = [setup_camera(sn) for sn in serial_numbers]
     try:
-        num_frames = 10
+        num_frames = 150
         for i in range(num_frames):
             for index, pipeline in enumerate(pipelines):
                 frames = pipeline.wait_for_frames()
