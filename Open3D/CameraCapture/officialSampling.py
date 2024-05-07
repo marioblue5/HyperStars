@@ -54,7 +54,9 @@ def camera_pipeline(pipeline, directory):
     try:
         while True:
             # Wait for a coherent pair of frames: depth and color
-            frames = pipeline.wait_for_frames()
+            frames = pipeline.wait_for_frames(timeout_ms=5000)
+            if not frames:
+                continue
             depth_frame = frames.get_depth_frame()
             color_frame = frames.get_color_frame()
             if not depth_frame or not color_frame:
@@ -88,6 +90,8 @@ def camera_pipeline(pipeline, directory):
             if frame_counter >= 150:
                 print(f"Reached 150 frames for {directory}. Stopping capture.")
                 break
+    except Exception as e:
+        print(f"Error in thread {directory}: {str(e)}")
     finally:
         pipeline.stop()
 
