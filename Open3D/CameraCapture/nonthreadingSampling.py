@@ -22,7 +22,7 @@ def setup_camera(serial_number):
     pipeline.start(config)
     return pipeline
 
-def capture_frames(pipeline, device_id, output_folder, num_frames=150):
+def capture_frames(pipeline, device_id, output_folder, num_frames=180):
     """Capture a number of frames from a camera and save them to disk."""
     for i in range(num_frames):
         frames = pipeline.wait_for_frames()
