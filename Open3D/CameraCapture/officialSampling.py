@@ -3,7 +3,6 @@ import numpy as np
 import cv2
 import threading
 import os
-import time
 import json
 
 def save_image(filename, image, is_color=False):
@@ -26,41 +25,18 @@ def save_intrinsics_as_json(path, profile):
     with open(path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def camera_pipeline(device_id):
-    # Create a pipeline for each camera
+def setup_camera(serial_number):
+    """Set up and return a RealSense pipeline for a given serial number."""
     pipeline = rs.pipeline()
     config = rs.config()
-
-    # Enable the device
-    config.enable_device(device_id)
-    # Enable depth and color streams
+    config.enable_device(serial_number)
     config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
     config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 30)
+    pipeline.start(config)
+    return pipeline
 
-    # Start the pipeline
-    profile = pipeline.start(config)
-
-    # Save intrinsic parameters
-    depth_intrinsics = profile.get_stream(rs.stream.depth).as_video_stream_profile().get_intrinsics()
-    color_intrinsics = profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
-    save_intrinsics_as_json(f'intrinsics_depth_{device_id}.json', depth_intrinsics)
-    save_intrinsics_as_json(f'intrinsics_color_{device_id}.json', color_intrinsics)
-
-    # Declare filters
-    depth_to_disparity = rs.disparity_transform(True)
-    disparity_to_depth = rs.disparity_transform(False)
-    spatial = rs.spatial_filter()
-    temporal = rs.temporal_filter()
-    # Set default values for spatial filter
-    spatial.set_option(rs.option.filter_magnitude, 2)
-    spatial.set_option(rs.option.filter_smooth_alpha, 0.6)
-    spatial.set_option(rs.option.filter_smooth_delta, 50)
-    # Set default values for temporal filter
-    temporal.set_option(rs.option.filter_smooth_alpha, 1)
-    temporal.set_option(rs.option.filter_smooth_delta, 20)
-    temporal.set_option(rs.option.holes_fill, 2)
-  
-    # Initialize frame counter
+def camera_pipeline(pipeline, directory):
+    """Capture, process, and save images from a single camera."""
     frame_counter = 0
     try:
         while True:
@@ -75,8 +51,8 @@ def camera_pipeline(device_id):
             depth_image = np.asanyarray(depth_frame.get_data())
             color_image = np.asanyarray(color_frame.get_data())
 
-            depth_file_name = f'pre_depth_{device_id}_{frame_counter}.png'
-            color_file_name = f'pre_color_{device_id}_{frame_counter}.jpg'
+            depth_file_name = os.path.join(directory, f'pre_depth_{frame_counter}.png')
+            color_file_name = os.path.join(directory, f'pre_color_{frame_counter}.jpg')
 
             # Save pre-processed images
             save_image(depth_file_name, depth_image)
@@ -90,25 +66,21 @@ def camera_pipeline(device_id):
 
             # Convert processed depth frame to numpy array for saving
             processed_depth_image = np.asanyarray(processed_depth.get_data())
-            post_depth_file_name = f'post_depth_{device_id}_{frame_counter}.png'
+            post_depth_file_name = os.path.join(directory, f'post_depth_{frame_counter}.png')
             save_image(post_depth_file_name, processed_depth_image)
 
             # Increment frame counter
             frame_counter += 1
-            print("Capturing images: ")
-            print(frame_counter)
     finally:
         pipeline.stop()
 
 def main():
-    # List your device IDs
-    device_ids = ['device_id_1', 'device_id_2', 'device_id_3']
-
     # Ensure the output directory exists
     if not os.path.exists('output'):
         os.mkdir('output')
     os.chdir('output')
 
+    # Initialize RealSense context
     context = rs.context()
     devices = context.query_devices()
     serial_numbers = [device.get_info(rs.camera_info.serial_number) for device in devices]
@@ -116,11 +88,9 @@ def main():
     if len(serial_numbers) < 3:
         raise ValueError("Three D405 cameras are not connected")
 
-    # Setup pipelines for each camera
+    # Setup pipelines and directories for each camera
     pipelines = [setup_camera(sn) for sn in serial_numbers]
-
-    # Directory names for each camera
-    directories = ["Camera_1", "Camera_2", "Camera_3"]
+    directories = [f"Camera_{i+1}" for i in range(len(pipelines))]
 
     # Start threads for each camera
     threads = []
