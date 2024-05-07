@@ -95,7 +95,8 @@ def camera_pipeline(device_id):
 
             # Increment frame counter
             frame_counter += 1
-
+            print("Capturing images: ")
+            print(frame_counter)
     finally:
         pipeline.stop()
 
