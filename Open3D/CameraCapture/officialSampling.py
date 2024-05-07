@@ -109,10 +109,23 @@ def main():
         os.mkdir('output')
     os.chdir('output')
 
+    context = rs.context()
+    devices = context.query_devices()
+    serial_numbers = [device.get_info(rs.camera_info.serial_number) for device in devices]
+
+    if len(serial_numbers) < 3:
+        raise ValueError("Three D405 cameras are not connected")
+
+    # Setup pipelines for each camera
+    pipelines = [setup_camera(sn) for sn in serial_numbers]
+
+    # Directory names for each camera
+    directories = ["Camera_1", "Camera_2", "Camera_3"]
+
     # Start threads for each camera
     threads = []
-    for device_id in device_ids:
-        thread = threading.Thread(target=camera_pipeline, args=(device_id,))
+    for pipeline, directory in zip(pipelines, directories):
+        thread = threading.Thread(target=camera_pipeline, args=(pipeline, directory))
         threads.append(thread)
         thread.start()
 
