@@ -280,7 +280,7 @@ def start_capture():
         pipelines = [setup_camera(sn) for sn in serial_numbers]
 
         # Directory names for each camera
-        directories = ["DEF_Camera_1", "DEF_Camera_2", "DEF_Camera_3"]
+        directories = ["ABC_Camera_1", "ABC_Camera_2", "ABC_Camera_3"]
 
         # Capture 100 frames from each camera
         for i in range(180):
