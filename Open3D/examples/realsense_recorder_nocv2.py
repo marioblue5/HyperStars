@@ -156,11 +156,10 @@ if __name__ == "__main__":
 
     # Streaming loop
     frame_count = 0
-    initial_time = time.time()
     try:
         while True:
             # Get frameset of color and depth
-
+            previous_time = time.time()
             frames = pipeline.wait_for_frames()
             # Align the depth frame to color frame
             aligned_frames = align.process(frames)
@@ -172,7 +171,6 @@ if __name__ == "__main__":
             # Validate that both frames are valid
             if not aligned_depth_frame or not color_frame:
                 continue
-
             depth_image = np.asanyarray(aligned_depth_frame.get_data())
             color_image = np.asanyarray(color_frame.get_data())
 
@@ -187,27 +185,7 @@ if __name__ == "__main__":
                         (path_color, frame_count), color_image)
                 print("Saved color + depth image %06d" % frame_count)
                 frame_count += 1
-
-            # Remove background - Set pixels further than clipping_distance to grey
-            grey_color = 153
-            #depth image is 1 channel, color is 3 channels
-            depth_image_3d = np.dstack((depth_image, depth_image, depth_image))
-            bg_removed = np.where((depth_image_3d > clipping_distance) | \
-                    (depth_image_3d <= 0), grey_color, color_image)
-
-            # Render images
-            depth_colormap = cv2.applyColorMap(
-                cv2.convertScaleAbs(depth_image, alpha=0.09), cv2.COLORMAP_JET)
-            images = np.hstack((bg_removed, depth_colormap))
-            cv2.namedWindow('Recorder Realsense', cv2.WINDOW_AUTOSIZE)
-            cv2.imshow('Recorder Realsense', images)
-            key = cv2.waitKey(1)
-
-            # if 'esc' button pressed, escape loop and exit program
-            if key == 27:
-                cv2.destroyAllWindows()
-                break
+            current_fps = 1/(time.time()-previous_time)
+            print(current_fps)
     finally:
-        real_fps = frame_count/(time.time()-initial_time)
-        print(f"Current fps is {real_fps}")
         pipeline.stop()
