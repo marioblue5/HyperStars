@@ -60,7 +60,6 @@ def capture_frame(pipeline, folder_name, frame_number):
     cv2.imwrite(f"{folder_name}/depth-{frame_number}.png", depth_image)
     cv2.imwrite(f"{folder_name}/color-{frame_number}.jpg", color_image)
     total_time = time.time() - initial_time
-    print(f"Total time spent for this frame is: {total_time}")
     return True
 
 # Thread target function to handle camera capture
