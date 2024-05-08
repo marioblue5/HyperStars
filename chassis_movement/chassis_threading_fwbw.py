@@ -250,6 +250,7 @@ def save_intrinsic_as_json(filename, frame):
 # Function to capture and save a frame from each camera
 def capture_frame(pipeline, folder_name, frame_number):
     ensure_folder(folder_name)
+    initial_time = time.time()
     frames = pipeline.wait_for_frames()
     depth_frame = frames.get_depth_frame()
     color_frame = frames.get_color_frame()
@@ -264,6 +265,8 @@ def capture_frame(pipeline, folder_name, frame_number):
     color_image = np.asanyarray(color_frame.get_data())
     cv2.imwrite(f"{folder_name}/depth-{frame_number}.png", depth_image)
     cv2.imwrite(f"{folder_name}/color-{frame_number}.jpg", color_image)
+    total_time = time.time() - initial_time
+    print(f"Total time spent for this frame is: {total_time}")
     return True
 
 def start_capture():
@@ -283,7 +286,7 @@ def start_capture():
         directories = ["ABC_Camera_1", "ABC_Camera_2", "ABC_Camera_3"]
 
         # Capture 100 frames from each camera
-        for i in range(180):
+        for i in range(300):
             for pipeline, directory in zip(pipelines, directories):
                 capture_frame(pipeline, directory, i)
 
