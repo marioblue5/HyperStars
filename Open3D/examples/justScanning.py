@@ -3,12 +3,10 @@ import pyrealsense2 as rs
 import cv2
 import os
 import json
-import Adafruit_PCA9685
 import time
 import numpy as np
 import threading
     # import serial
-import Jetson.GPIO as GPIO
     # from timeit import default_timer
 
 # Initialization

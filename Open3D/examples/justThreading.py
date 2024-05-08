@@ -2,11 +2,9 @@ import pyrealsense2 as rs
 import cv2
 import os
 import json
-import Adafruit_PCA9685
 import time
 import numpy as np
 import threading
-import Jetson.GPIO as GPIO
 
 # Initialization
 
@@ -69,7 +67,7 @@ def capture_frame(pipeline, folder_name, frame_number):
 def handle_camera(serial_number, directory):
     pipeline = setup_camera(serial_number)
     try:
-        for i in range(100):  # Adjust number of frames as needed
+        for i in range(300):  # Adjust number of frames as needed
             capture_frame(pipeline, directory, i)
     finally:
         pipeline.stop()
