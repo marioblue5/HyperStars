@@ -82,7 +82,7 @@ def start_capture():
             raise ValueError("Three D405 cameras are not connected")
 
         # Directory names for each camera
-        directories = ["ABC_Camera_1", "ABC_Camera_2", "ABC_Camera_3"]
+        directories = ["DEF_Camera_1", "DEF_Camera_2", "DEF_Camera_3"]
 
         # Creating threads for each camera
         threads = []
