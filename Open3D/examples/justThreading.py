@@ -13,6 +13,7 @@ def ensure_folder(folder):
 
 # Function to setup each camera
 def setup_camera(serial_number):
+    print(serial_number)
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_device(serial_number)
@@ -70,7 +71,7 @@ def start_capture():
         # Prompt user for directory name
         user_input = input("Enter the directory name for saving the datasets: ")
         base_directory = os.path.join("datasets", user_input)
-
+        ensure_folder(base_directory)
         # Find connected devices
         context = rs.context()
         devices = context.query_devices()
@@ -80,7 +81,7 @@ def start_capture():
             raise ValueError("Three D405 cameras are not connected")
 
         # Directory names for each camera
-        directories = [f"{base_directory}_Camera_{i+1}" for i in range(len(serial_numbers))]
+        directories = [os.path.join(base_directory,f"Camera_{i+1}") for i in range(len(serial_numbers))]
 
         # Creating threads for each camera
         threads = []
