@@ -5,7 +5,7 @@ import time
 import threading
 
 # Initialization
-
+lock = threading.Lock()
 # Function to create a folder if it doesn't exist
 def ensure_folder(folder):
     if not os.path.exists(folder):
