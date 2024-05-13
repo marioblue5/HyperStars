@@ -61,9 +61,9 @@ def record_to_rosbag(config, directory, duration):
 # Thread target function to handle camera capture
 def handle_camera(serial_number, directory):
     pipeline, config = setup_camera(serial_number)
-    save_intrinsic_as_json(directory, pipeline)
     duration = 10  # Record for 10 seconds; adjust as needed
     record_to_rosbag(config, directory, duration)
+    save_intrinsic_as_json(directory, pipeline)
 
 def start_capture():
     try:
