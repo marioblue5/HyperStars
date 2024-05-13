@@ -2,10 +2,9 @@ import pyrealsense2 as rs
 import os
 import json
 import time
-import threading
 
 # Initialization
-lock = threading.Lock()
+
 # Function to create a folder if it doesn't exist
 def ensure_folder(folder):
     if not os.path.exists(folder):
@@ -57,16 +56,9 @@ def record_to_rosbag(config, directory, duration, pipeline):
             pipeline.wait_for_frames()
             frame += 1
     finally:
+        pipeline.stop()
         print(f"Number of frames in this {duration} second interval: {frame}")
         print(f"Finished recording to {bag_filename}")
-
-# Thread target function to handle camera capture
-def handle_camera(serial_number, directory):
-    pipeline, config = setup_camera(serial_number)
-    duration = 10  # Record for 10 seconds; adjust as needed
-    record_to_rosbag(config, directory, duration,pipeline)
-    save_intrinsic_as_json(directory, pipeline)
-    pipeline.stop()
 
 def start_capture():
     try:
@@ -84,19 +76,19 @@ def start_capture():
 
         # Directory names for each camera
         directories = [os.path.join(base_directory,f"Camera_{i+1}") for i in range(len(serial_numbers))]
-        # Creating threads for each camera
-        threads = []
-        for sn, directory in zip(serial_numbers, directories):
-            thread = threading.Thread(target=handle_camera, args=(sn, directory))
-            threads.append(thread)
-            thread.start()
 
-        # Wait for all threads to complete
-        for thread in threads:
-            thread.join()
+        # Process each camera sequentially
+        for sn, directory in zip(serial_numbers, directories):
+            pipeline, config = setup_camera(sn)
+            handle_camera(sn, directory, pipeline, config)
 
     finally:
         print("ROS bag capture and intrinsics saving completed for all cameras.")
+
+def handle_camera(serial_number, directory, pipeline, config):
+    duration = 10  # Record for 10 seconds; adjust as needed
+    record_to_rosbag(config, directory, duration, pipeline)
+    save_intrinsic_as_json(directory, pipeline)
 
 if __name__ == '__main__':
     start_capture()
