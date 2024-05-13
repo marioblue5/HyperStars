@@ -84,8 +84,9 @@ def start_capture():
 
         # Directory names for each camera
         directories = [os.path.join(base_directory,f"Camera_{i+1}") for i in range(len(serial_numbers))]
-
         # Creating threads for each camera
+        serial_numbers = serial_numbers[1]
+        directories = directories[1]
         threads = []
         for sn, directory in zip(serial_numbers, directories):
             thread = threading.Thread(target=handle_camera, args=(sn, directory))
