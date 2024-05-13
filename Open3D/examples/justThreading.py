@@ -23,6 +23,7 @@ def setup_camera(serial_number):
 
 # Function to save camera intrinsics to a JSON file
 def save_intrinsic_as_json(directory, pipeline):
+    ensure_folder(directory)
     frames = pipeline.wait_for_frames()
     color_frame = frames.get_color_frame()
     intrinsics = color_frame.profile.as_video_stream_profile().intrinsics
@@ -43,11 +44,10 @@ def save_intrinsic_as_json(directory, pipeline):
         )
 
 # Function to record data into a ROS bag file
-def record_to_rosbag(config, directory, duration):
+def record_to_rosbag(config, directory, duration,pipeline):
     ensure_folder(directory)
     bag_filename = os.path.join(directory, "realsense.bag")
     config.enable_record_to_file(bag_filename)
-    pipeline = rs.pipeline()
     pipeline.start(config)
     try:
         print(f"Recording to {bag_filename} for {duration} seconds...")
@@ -55,15 +55,15 @@ def record_to_rosbag(config, directory, duration):
         while time.time() - start_time < duration:
             pipeline.wait_for_frames()
     finally:
-        pipeline.stop()
         print(f"Finished recording to {bag_filename}")
 
 # Thread target function to handle camera capture
 def handle_camera(serial_number, directory):
     pipeline, config = setup_camera(serial_number)
     duration = 10  # Record for 10 seconds; adjust as needed
-    record_to_rosbag(config, directory, duration)
+    record_to_rosbag(config, directory, duration,pipeline)
     save_intrinsic_as_json(directory, pipeline)
+    pipeline.stop()
 
 def start_capture():
     try:
