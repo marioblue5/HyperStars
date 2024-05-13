@@ -56,7 +56,6 @@ def record_to_rosbag(config, directory, duration, pipeline):
             pipeline.wait_for_frames()
             frame += 1
     finally:
-        pipeline.stop()
         print(f"Number of frames in this {duration} second interval: {frame}")
         print(f"Finished recording to {bag_filename}")
 
@@ -81,6 +80,7 @@ def start_capture():
         for sn, directory in zip(serial_numbers, directories):
             pipeline, config = setup_camera(sn)
             handle_camera(sn, directory, pipeline, config)
+            pipeline.stop()
 
     finally:
         print("ROS bag capture and intrinsics saving completed for all cameras.")
