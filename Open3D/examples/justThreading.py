@@ -19,7 +19,6 @@ def setup_camera(serial_number):
     config.enable_device(serial_number)
     config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
     config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 30)
-    pipeline.start(config)
     return pipeline, config
 
 # Function to save camera intrinsics to a JSON file
