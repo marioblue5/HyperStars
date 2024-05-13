@@ -44,17 +44,20 @@ def save_intrinsic_as_json(directory, pipeline):
         )
 
 # Function to record data into a ROS bag file
-def record_to_rosbag(config, directory, duration,pipeline):
+def record_to_rosbag(config, directory, duration, pipeline):
     ensure_folder(directory)
     bag_filename = os.path.join(directory, "realsense.bag")
     config.enable_record_to_file(bag_filename)
     pipeline.start(config)
+    frame = 0
     try:
         print(f"Recording to {bag_filename} for {duration} seconds...")
         start_time = time.time()
         while time.time() - start_time < duration:
             pipeline.wait_for_frames()
+            frame += 1
     finally:
+        print(f"Number of frames in this {duration} second interval: {frame}")
         print(f"Finished recording to {bag_filename}")
 
 # Thread target function to handle camera capture
