@@ -124,9 +124,9 @@ if __name__ == "__main__":
         print('Using the default profiles: \n  color:{}, depth:{}'.format(
             color_profiles[0], depth_profiles[0]))
         w, h, fps, fmt = depth_profiles[0]
-        config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+        config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
         w, h, fps, fmt = color_profiles[0]
-        config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 30)
+        config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
         if args.record_rosbag:
             config.enable_record_to_file(path_bag)
     if args.playback_rosbag:
@@ -156,36 +156,8 @@ if __name__ == "__main__":
 
     # Streaming loop
     frame_count = 0
-    try:
-        while True:
-            # Get frameset of color and depth
-            previous_time = time.time()
-            frames = pipeline.wait_for_frames()
-            # Align the depth frame to color frame
-            aligned_frames = align.process(frames)
-
-            # Get aligned frames
-            aligned_depth_frame = aligned_frames.get_depth_frame()
-            color_frame = aligned_frames.get_color_frame()
-
-            # Validate that both frames are valid
-            if not aligned_depth_frame or not color_frame:
-                continue
-            depth_image = np.asanyarray(aligned_depth_frame.get_data())
-            color_image = np.asanyarray(color_frame.get_data())
-
-            if args.record_imgs:
-                if frame_count == 0:
-                    save_intrinsic_as_json(
-                        join(args.output_folder, "camera_intrinsic.json"),
-                        color_frame)
-                cv2.imwrite("%s/%06d.png" % \
-                        (path_depth, frame_count), depth_image)
-                cv2.imwrite("%s/%06d.jpg" % \
-                        (path_color, frame_count), color_image)
-                print("Saved color + depth image %06d" % frame_count)
-                frame_count += 1
-            current_fps = 1/(time.time()-previous_time)
-            print(current_fps)
-    finally:
-        pipeline.stop()
+    initial_time = time.time()
+    while time.time()-initial_time < 5:
+        continue
+    pipeline.stop()
+    print("Script finished!")

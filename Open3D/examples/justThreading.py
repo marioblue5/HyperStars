@@ -1,9 +1,7 @@
 import pyrealsense2 as rs
-import cv2
 import os
 import json
 import time
-import numpy as np
 import threading
 
 # Initialization
@@ -21,11 +19,14 @@ def setup_camera(serial_number):
     config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
     config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 30)
     pipeline.start(config)
-    return pipeline
+    return pipeline, config
 
 # Function to save camera intrinsics to a JSON file
-def save_intrinsic_as_json(filename, frame):
-    intrinsics = frame.profile.as_video_stream_profile().intrinsics
+def save_intrinsic_as_json(directory, pipeline):
+    frames = pipeline.wait_for_frames()
+    color_frame = frames.get_color_frame()
+    intrinsics = color_frame.profile.as_video_stream_profile().intrinsics
+    filename = os.path.join(directory, "intrinsics.json")
     with open(filename, 'w') as outfile:
         json.dump(
             {
@@ -41,38 +42,35 @@ def save_intrinsic_as_json(filename, frame):
             indent=4
         )
 
-# Function to capture and save a frame from each camera
-def capture_frame(pipeline, folder_name, frame_number):
-    ensure_folder(folder_name)
-    initial_time = time.time()
-    frames = pipeline.wait_for_frames()
-    depth_frame = frames.get_depth_frame()
-    color_frame = frames.get_color_frame()
-    if not depth_frame or not color_frame:
-        return False
-    
-    # Save intrinsics
-    save_intrinsic_as_json(f"{folder_name}/intrinsics.json", color_frame)
-    
-    # Save images
-    depth_image = np.asanyarray(depth_frame.get_data())
-    color_image = np.asanyarray(color_frame.get_data())
-    cv2.imwrite(f"{folder_name}/depth-{frame_number}.png", depth_image)
-    cv2.imwrite(f"{folder_name}/color-{frame_number}.jpg", color_image)
-    total_time = time.time() - initial_time
-    return True
+# Function to record data into a ROS bag file
+def record_to_rosbag(config, directory, duration):
+    ensure_folder(directory)
+    bag_filename = os.path.join(directory, "realsense.bag")
+    config.enable_record_to_file(bag_filename)
+    pipeline = rs.pipeline()
+    pipeline.start(config)
+    try:
+        print(f"Recording to {bag_filename} for {duration} seconds...")
+        start_time = time.time()
+        while time.time() - start_time < duration:
+            pipeline.wait_for_frames()
+    finally:
+        pipeline.stop()
+        print(f"Finished recording to {bag_filename}")
 
 # Thread target function to handle camera capture
 def handle_camera(serial_number, directory):
-    pipeline = setup_camera(serial_number)
-    try:
-        for i in range(300):  # Adjust number of frames as needed
-            capture_frame(pipeline, directory, i)
-    finally:
-        pipeline.stop()
+    pipeline, config = setup_camera(serial_number)
+    save_intrinsic_as_json(directory, pipeline)
+    duration = 10  # Record for 10 seconds; adjust as needed
+    record_to_rosbag(config, directory, duration)
 
 def start_capture():
     try:
+        # Prompt user for directory name
+        user_input = input("Enter the directory name for saving the datasets: ")
+        base_directory = os.path.join("datasets", user_input)
+
         # Find connected devices
         context = rs.context()
         devices = context.query_devices()
@@ -82,7 +80,7 @@ def start_capture():
             raise ValueError("Three D405 cameras are not connected")
 
         # Directory names for each camera
-        directories = ["DEF_Camera_1", "DEF_Camera_2", "DEF_Camera_3"]
+        directories = [f"{base_directory}_Camera_{i+1}" for i in range(len(serial_numbers))]
 
         # Creating threads for each camera
         threads = []
@@ -96,7 +94,7 @@ def start_capture():
             thread.join()
 
     finally:
-        print("Image capture and intrinsics saving completed for all cameras.")
+        print("ROS bag capture and intrinsics saving completed for all cameras.")
 
 if __name__ == '__main__':
     start_capture()

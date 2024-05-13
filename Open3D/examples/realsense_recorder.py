@@ -202,7 +202,7 @@ if __name__ == "__main__":
             cv2.namedWindow('Recorder Realsense', cv2.WINDOW_AUTOSIZE)
             cv2.imshow('Recorder Realsense', images)
             key = cv2.waitKey(1)
-
+            frame_count += 1
             # if 'esc' button pressed, escape loop and exit program
             if key == 27:
                 cv2.destroyAllWindows()
