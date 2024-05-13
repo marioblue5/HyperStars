@@ -11,7 +11,6 @@ import time
 import numpy as np
 import threading
     # import serial
-import Jetson.GPIO as GPIO
     # from timeit import default_timer
 
 # Initialization
