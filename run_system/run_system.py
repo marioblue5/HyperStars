@@ -2,6 +2,7 @@ import threading
 import multiprocessing
 from camera_system import start_capture
 from chassis_movement import chassis_forward_backward
+import time
 
 if __name__ == '__main__':
     print("Starting the system...")
@@ -13,6 +14,7 @@ if __name__ == '__main__':
     motor_thread.start()
 
     # Run camera processes (multiprocessing is internal)
+    time.sleep(duration*0.2)
     start_capture(base_directory)
 
     motor_thread.join()  # Ensure motor operations complete
