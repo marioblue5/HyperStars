@@ -30,7 +30,7 @@ min_signal = 1050
 
 def ramping(percent_speed):
     # Calculate number of steps for each half of the ramp
-    intervals = 3
+    intervals = 5
 
     # Create an increasing ramp from 0 to percent_speed
     increasing_ramp = np.linspace(0, percent_speed, num=intervals, endpoint=True)
@@ -42,7 +42,8 @@ def ramping(percent_speed):
     #Remove the initial value because it's redundant
     decreasing_ramp = decreasing_ramp[1:]
     # Combine both ramps into a single array
-
+    print(increasing_ramp)
+    print(decreasing_ramp)
     return increasing_ramp, decreasing_ramp
 
 
@@ -60,12 +61,12 @@ def percent_to_pwm(percent):
 
 # Motor Move Function, Time in seconds
 def chassis_forward_backward(duration,percent_speed):
-
+    pwm = initialize_motors()
     ramp_up,ramp_down = ramping(percent_speed)
 
-    # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
+    # The idea is to spend the first 10% of the duration ramping up, and the last 10% ramping down
 
-    ramping_time = np.minimum(0.2*duration,5)
+    ramping_time = np.minimum(0.1*duration,4)
 
     # Starting ramp up
     for i in ramp_up:
@@ -79,94 +80,98 @@ def chassis_forward_backward(duration,percent_speed):
     pwm.set_pwm(1,0,percent_to_pwm(percent_speed*0.95))
     pwm.set_pwm(2,0,percent_to_pwm(percent_speed))
     pwm.set_pwm(3,0,percent_to_pwm(percent_speed*0.95))
-    time.sleep(duration*0.6)
+    time.sleep(duration*0.8)
     # Starting ramp down
     for i in ramp_down:
         for j in range(4):
             pwm.set_pwm(j,0,percent_to_pwm(i))
         time.sleep(ramping_time/ramp_down.size)
+    time.sleep(3)
+    print(" If motors did not stop by now then ramp down function is busted :(")
+    for j in range(4):
+         pwm.set_pwm(j,0,percent_to_pwm(0))
 
 # Note! Left and right movement do not need a negative percent value, just use 
 # 0-100 as a magnitude 
 
-def chassis_move_left(duration,percent_speed):
-    # Diagonal Pair
-    ramp_up,ramp_down = ramping(percent_speed)
+# def chassis_move_left(duration,percent_speed):
+#     # Diagonal Pair
+#     ramp_up,ramp_down = ramping(percent_speed)
 
-    # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
+#     # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
 
-    ramping_time = 0.2*duration
+#     ramping_time = 0.2*duration
 
-    # Starting ramp up
-    for i in ramp_up:
-        pwm.set_pwm(0, 0,percent_to_pwm(-abs(i)))
-        pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
-        # Diagonal Pair
-        pwm.set_pwm(1,0,percent_to_pwm(abs(i)))
-        pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
-        time.sleep(ramping_time/ramp_up.size)
-    time.sleep(duration*0.6)
-    # Starting ramp down
-    for i in ramp_down:
-        pwm.set_pwm(0, 0,percent_to_pwm(-abs(i)))
-        pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
-        # Diagonal Pair
-        pwm.set_pwm(1,0,percent_to_pwm(abs(i)))
-        pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
-        time.sleep(ramping_time/ramp_down.size)
-def chassis_rotate_cw(duration,percent_speed):
-    # Diagonal Pair
-    ramp_up,ramp_down = ramping(percent_speed)
+#     # Starting ramp up
+#     for i in ramp_up:
+#         pwm.set_pwm(0, 0,percent_to_pwm(-abs(i)))
+#         pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
+#         # Diagonal Pair
+#         pwm.set_pwm(1,0,percent_to_pwm(abs(i)))
+#         pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
+#         time.sleep(ramping_time/ramp_up.size)
+#     time.sleep(duration*0.6)
+#     # Starting ramp down
+#     for i in ramp_down:
+#         pwm.set_pwm(0, 0,percent_to_pwm(-abs(i)))
+#         pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
+#         # Diagonal Pair
+#         pwm.set_pwm(1,0,percent_to_pwm(abs(i)))
+#         pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
+#         time.sleep(ramping_time/ramp_down.size)
+# def chassis_rotate_cw(duration,percent_speed):
+#     # Diagonal Pair
+#     ramp_up,ramp_down = ramping(percent_speed)
 
-    # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
+#     # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
 
-    ramping_time = 0.2*duration
+#     ramping_time = 0.2*duration
 
-    # Starting ramp up
-    for i in ramp_up:
-        pwm.set_pwm(1, 0,percent_to_pwm(-abs(i)))
-        pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
-        # Diagonal Pair
-        pwm.set_pwm(0,0,percent_to_pwm(abs(i)))
-        pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
-        time.sleep(ramping_time/ramp_up.size)
-    time.sleep(duration*0.6)
-    # Starting ramp down
-    for i in ramp_down:
-        pwm.set_pwm(1, 0,percent_to_pwm(-abs(i)))
-        pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
-        # Diagonal Pair
-        pwm.set_pwm(0,0,percent_to_pwm(abs(i)))
-        pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
-        time.sleep(ramping_time/ramp_down.size)
+#     # Starting ramp up
+#     for i in ramp_up:
+#         pwm.set_pwm(1, 0,percent_to_pwm(-abs(i)))
+#         pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
+#         # Diagonal Pair
+#         pwm.set_pwm(0,0,percent_to_pwm(abs(i)))
+#         pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
+#         time.sleep(ramping_time/ramp_up.size)
+#     time.sleep(duration*0.6)
+#     # Starting ramp down
+#     for i in ramp_down:
+#         pwm.set_pwm(1, 0,percent_to_pwm(-abs(i)))
+#         pwm.set_pwm(3,0,percent_to_pwm(-abs(i)))
+#         # Diagonal Pair
+#         pwm.set_pwm(0,0,percent_to_pwm(abs(i)))
+#         pwm.set_pwm(2,0,percent_to_pwm(abs(i)))
+#         time.sleep(ramping_time/ramp_down.size)
 
-def chassis_rotate_ccw(duration,percent_speed):
-    # Diagonal Pair
-    ramp_up,ramp_down = ramping(percent_speed)
+# def chassis_rotate_ccw(duration,percent_speed):
+#     # Diagonal Pair
+#     ramp_up,ramp_down = ramping(percent_speed)
 
-    # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
+#     # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
 
-    ramping_time = 0.2*duration
+#     ramping_time = 0.2*duration
 
-    # Starting ramp up
-    for i in ramp_up:
-        pwm.set_pwm(1, 0,percent_to_pwm(abs(i)))
-        pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
-        # Diagonal Pair
-        pwm.set_pwm(0,0,percent_to_pwm(-abs(i)))
-        pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
-        time.sleep(ramping_time/ramp_up.size)
-    time.sleep(duration*0.6)
-    # Starting ramp down
-    for i in ramp_down:
-        pwm.set_pwm(1, 0,percent_to_pwm(abs(i)))
-        pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
-        # Diagonal Pair
-        pwm.set_pwm(0,0,percent_to_pwm(-abs(i)))
-        pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
-        time.sleep(ramping_time/ramp_down.size)
+#     # Starting ramp up
+#     for i in ramp_up:
+#         pwm.set_pwm(1, 0,percent_to_pwm(abs(i)))
+#         pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
+#         # Diagonal Pair
+#         pwm.set_pwm(0,0,percent_to_pwm(-abs(i)))
+#         pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
+#         time.sleep(ramping_time/ramp_up.size)
+#     time.sleep(duration*0.6)
+#     # Starting ramp down
+#     for i in ramp_down:
+#         pwm.set_pwm(1, 0,percent_to_pwm(abs(i)))
+#         pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
+#         # Diagonal Pair
+#         pwm.set_pwm(0,0,percent_to_pwm(-abs(i)))
+#         pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
+#         time.sleep(ramping_time/ramp_down.size)
     
-def chassis_move_right(duration, percent_speed):
+# def chassis_move_right(duration, percent_speed):
     # Diagonal Pair
     ramp_up,ramp_down = ramping(percent_speed)
 
@@ -191,6 +196,16 @@ def chassis_move_right(duration, percent_speed):
         pwm.set_pwm(1,0,percent_to_pwm(-abs(i)))
         pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
         time.sleep(ramping_time/ramp_down.size)
+def initialize_motors():
+
+    # Initialize the PCA9685 using the default address
+    pwm = Adafruit_PCA9685.PCA9685(busnum=1)
+
+    # Set the PWM frequency to 60 Hz (good for servos)
+    pwm.set_pwm_freq(60)
+    return pwm
+
+        
 # Stepper Motors!!!!
 
 # def move_stepmotor(direction, steps, delay=0.001):
@@ -241,14 +256,10 @@ steps_per_revolution = 2000
 # GPIO.setup(STEP_pin_L, GPIO.OUT)
 # GPIO.setup(STEP_pin_R, GPIO.OUT)
 
-# Initialize the PCA9685 using the default address
-pwm = Adafruit_PCA9685.PCA9685(busnum=1)
-
-# Set the PWM frequency to 60 Hz (good for servos)
-pwm.set_pwm_freq(60)
 
 if __name__ == '__main__':
     try:
+        initialize_motors()
         # steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
         # thread1 = threading.Thread(target=chassis_forward_backward,args=(8,20))
         thread2 = threading.Thread(target=start_capture)
