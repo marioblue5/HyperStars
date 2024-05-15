@@ -85,6 +85,7 @@ def chassis_forward_backward(duration,percent_speed):
         for j in range(4):
             pwm.set_pwm(j,0,percent_to_pwm(i))
         time.sleep(ramping_time/ramp_down.size)
+    print("END OF MOVEMENT!")
 
 # Note! Left and right movement do not need a negative percent value, just use 
 # 0-100 as a magnitude 
