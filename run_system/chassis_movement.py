@@ -168,30 +168,30 @@ def chassis_forward_backward(duration,percent_speed):
 #         time.sleep(ramping_time/ramp_down.size)
     
 # def chassis_move_right(duration, percent_speed):
-    # Diagonal Pair
-    ramp_up,ramp_down = ramping(percent_speed)
+#     # Diagonal Pair
+#     ramp_up,ramp_down = ramping(percent_speed)
 
-    # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
+#     # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
 
-    ramping_time = 0.2*duration
+#     ramping_time = 0.2*duration
 
-    # Starting ramp up
-    for i in ramp_up:
-        pwm.set_pwm(0, 0,percent_to_pwm(abs(i)))
-        pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
-        # Diagonal Pair
-        pwm.set_pwm(1,0,percent_to_pwm(-abs(i)))
-        pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
-        time.sleep(ramping_time/ramp_up.size)
-    time.sleep(duration*0.6)
-    # Starting ramp down
-    for i in ramp_down:
-        pwm.set_pwm(0, 0,percent_to_pwm(abs(i)))
-        pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
-        # Diagonal Pair
-        pwm.set_pwm(1,0,percent_to_pwm(-abs(i)))
-        pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
-        time.sleep(ramping_time/ramp_down.size)
+#     # Starting ramp up
+#     for i in ramp_up:
+#         pwm.set_pwm(0, 0,percent_to_pwm(abs(i)))
+#         pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
+#         # Diagonal Pair
+#         pwm.set_pwm(1,0,percent_to_pwm(-abs(i)))
+#         pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
+#         time.sleep(ramping_time/ramp_up.size)
+#     time.sleep(duration*0.6)
+#     # Starting ramp down
+#     for i in ramp_down:
+#         pwm.set_pwm(0, 0,percent_to_pwm(abs(i)))
+#         pwm.set_pwm(3,0,percent_to_pwm(abs(i)))
+#         # Diagonal Pair
+#         pwm.set_pwm(1,0,percent_to_pwm(-abs(i)))
+#         pwm.set_pwm(2,0,percent_to_pwm(-abs(i)))
+#         time.sleep(ramping_time/ramp_down.size)
 def initialize_motors():
 
     # Initialize the PCA9685 using the default address
