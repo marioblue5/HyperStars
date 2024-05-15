@@ -18,5 +18,4 @@ if __name__ == '__main__':
     start_capture(base_directory)
 
     motor_thread.join()  # Ensure motor operations complete
-    time.sleep(duration*0.5)
     print("System shutdown. All operations completed.")
