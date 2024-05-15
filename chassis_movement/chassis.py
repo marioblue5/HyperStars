@@ -45,39 +45,68 @@ def ramping(percent_speed):
 
 # Mapping Percent and Signal Values
 def percent_to_pwm(percent):
-    if percent > 100: 
-        percent = 100
-    elif percent < -100:
-        percent = -100
-
+    # float [-1, 1]
+    k = np.clip(-100, 100, percent) / 100.0
     # Calculate the PWM signal value based on the provided percent speed
-    signal_value = stop_signal + (percent / 100) * 500
-
+    signal_value = stop_signal + k * 500
     # Convert microseconds to PWM values
     pwm_value = (signal_value / 1000000.0) * freq * 4096
-
     return int(pwm_value)
 
-# Motor Move Function, Time in seconds
-def chassis_forward_backward(duration,percent_speed):
 
-    ramp_up,ramp_down = ramping(percent_speed)
+def apply_speed(velocity: np.ndarray):
+    velocity = velocity.reshape(-1)
+    for i, v in enumurate(velocity):
+        pwm.set_pwm(i, 0, percent_to_pwm(v))
+
+
+
+# Motor Move Function, Time in seconds
+def chassis_forward_backward(velocity: np.ndarray, duration):
+
+    ramp_up, ramp_down = ramping(1.0)
 
     # The idea is to spend the first 20% of the duration ramping up, and the last 20% ramping down
 
-    ramping_time = 0.2*duration
+    ramping_time = min(0.2 * duration, 5)
 
     # Starting ramp up
     for i in ramp_up:
-        for j in range(4):
-            pwm.set_pwm(j,0,percent_to_pwm(i))
-        time.sleep(ramping_time/ramp_up.size)
-    time.sleep(duration*0.6)
+        apply_speed(velocity * i)
+        ddl = time.time() + ramping_time/ramp_up.size
+        while time.time() < ddl:
+            yield "ramp up"
+    ddl = time.time() + time.sleep(duration*0.6)
+    while time.time() < ddl:
+        yield "linear"
     # Starting ramp down
     for i in ramp_down:
-        for j in range(4):
-            pwm.set_pwm(j,0,percent_to_pwm(i))
-        time.sleep(ramping_time/ramp_down.size)
+        apply_speed(velocity * i)
+        ddl = time.time() + ramping_time / ramp_down.size
+        while time.time() < ddl:
+            yield "ramp down"
+    # Idle
+    while True:
+        yield None
+
+def ctrl():
+    for states in zip(
+        move_stepmotor(direction, 10000, pin_stepper_1, pin_switch_1),
+        move_stepmotor(direction, 10000, pin_stepper_2, pin_switch_2),
+        chassis_forward_backward(
+            # velocity matrix
+            np.array([
+                [100.0, 100.0],
+                [100.0, 100.0]
+            ]),
+            # dutation, seconds
+            10.0
+        )
+    ):
+        for s in states:
+            if s is not None:
+                continue
+        break
 
 # Note! Left and right movement do not need a negative percent value, just use 
 # 0-100 as a magnitude 
