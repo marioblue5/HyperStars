@@ -37,7 +37,7 @@ def ramping(percent_speed):
 
 
     # Create a decreasing ramp from percent_speed to 0, use less intervals since it'll be easier to slow down
-    decreasing_ramp = np.linspace(percent_speed, 0, num=intervals-2, endpoint=True)
+    decreasing_ramp = np.linspace(percent_speed, 0, num=intervals-1, endpoint=True)
 
     #Remove the initial value because it's redundant
     decreasing_ramp = decreasing_ramp[1:]
@@ -50,7 +50,6 @@ def ramping(percent_speed):
 # Mapping Percent and Signal Values
 def percent_to_pwm(percent):
     np.clip(percent,-100,100)
-    print(percent)
     # Calculate the PWM signal value based on the provided percent speed
     signal_value = stop_signal + (percent / 100) * 500
 

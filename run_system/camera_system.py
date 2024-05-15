@@ -20,7 +20,7 @@ def initialize_camera(serial_number):
     return pipeline, config
 
 # Capture raw frames and keep them in memory
-def capture_frames(pipeline, config, duration=3):
+def capture_frames(pipeline, config, duration=1):
     frame_count = 0
     pipeline.start(config)
     start_time = time.time()
