@@ -85,10 +85,6 @@ def chassis_forward_backward(duration,percent_speed):
         for j in range(4):
             pwm.set_pwm(j,0,percent_to_pwm(i))
         time.sleep(ramping_time/ramp_down.size)
-    time.sleep(3)
-    print(" If motors did not stop by now then ramp down function is busted :(")
-    for j in range(4):
-         pwm.set_pwm(j,0,percent_to_pwm(0))
 
 # Note! Left and right movement do not need a negative percent value, just use 
 # 0-100 as a magnitude 
