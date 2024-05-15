@@ -257,29 +257,29 @@ steps_per_revolution = 2000
 # GPIO.setup(STEP_pin_R, GPIO.OUT)
 
 
-if __name__ == '__main__':
-    try:
-        initialize_motors()
-        # steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
-        # thread1 = threading.Thread(target=chassis_forward_backward,args=(8,20))
-        thread2 = threading.Thread(target=start_capture)
-        # time.sleep(1)
-        thread2.start()
-        # time.sleep(1)
-        # thread1.start()
-        # time.sleep(1)
+# if __name__ == '__main__':
+#     try:
+#         initialize_motors()
+#         # steps = steps_per_revolution * 3  # Change "1" to adjust the number of revolutions
+#         # thread1 = threading.Thread(target=chassis_forward_backward,args=(8,20))
+#         thread2 = threading.Thread(target=start_capture)
+#         # time.sleep(1)
+#         thread2.start()
+#         # time.sleep(1)
+#         # thread1.start()
+#         # time.sleep(1)
         
-        # thread1.join()
-        # move_stepmotor(False, steps)  # Move backward
-        print(" If motors did not stop by now then ramp down function is busted :(")
-        for j in range(4):
-             pwm.set_pwm(j,0,percent_to_pwm(0))
-        # time.sleep(1)
-        # chassis_forward_backward(10,-20)
-        for j in range(4):
-             pwm.set_pwm(j,0,percent_to_pwm(0))
-        thread2.join()
-    finally:
-        # GPIO.cleanup()
-        print("All good!")
+#         # thread1.join()
+#         # move_stepmotor(False, steps)  # Move backward
+#         print(" If motors did not stop by now then ramp down function is busted :(")
+#         for j in range(4):
+#              pwm.set_pwm(j,0,percent_to_pwm(0))
+#         # time.sleep(1)
+#         # chassis_forward_backward(10,-20)
+#         for j in range(4):
+#              pwm.set_pwm(j,0,percent_to_pwm(0))
+#         thread2.join()
+#     finally:
+#         # GPIO.cleanup()
+#         print("All good!")
        
