@@ -2,10 +2,9 @@ import pyrealsense2 as rs
 import os
 import json
 import time
-import threading
+import multiprocessing
 
 # Initialization
-lock = threading.Lock()
 # Function to create a folder if it doesn't exist
 def ensure_folder(folder):
     if not os.path.exists(folder):
@@ -60,11 +59,11 @@ def record_to_rosbag(config, directory, duration, pipeline):
         print(f"Number of frames in this {duration} second interval: {frame}")
         print(f"Finished recording to {bag_filename}")
 
-# Thread target function to handle camera capture
+# Process target function to handle camera capture
 def handle_camera(serial_number, directory):
     pipeline, config = setup_camera(serial_number)
     duration = 10  # Record for 10 seconds; adjust as needed
-    record_to_rosbag(config, directory, duration,pipeline)
+    record_to_rosbag(config, directory, duration, pipeline)
     save_intrinsic_as_json(directory, pipeline)
     pipeline.stop()
 
@@ -79,21 +78,21 @@ def start_capture():
         devices = context.query_devices()
         serial_numbers = [device.get_info(rs.camera_info.serial_number) for device in devices]
 
-        if len(serial_numbers) < 1:
+        if len(serial_numbers) < 3:
             raise ValueError("Three D405 cameras are not connected")
 
         # Directory names for each camera
-        directories = [os.path.join(base_directory,f"Camera_{i+1}") for i in range(len(serial_numbers))]
-        # Creating threads for each camera
-        threads = []
+        directories = [os.path.join(base_directory, f"Camera_{i+1}") for i in range(len(serial_numbers))]
+        # Creating processes for each camera
+        processes = []
         for sn, directory in zip(serial_numbers, directories):
-            thread = threading.Thread(target=handle_camera, args=(sn, directory))
-            threads.append(thread)
-            thread.start()
+            process = multiprocessing.Process(target=handle_camera, args=(sn, directory))
+            processes.append(process)
+            process.start()
 
-        # Wait for all threads to complete
-        for thread in threads:
-            thread.join()
+        # Wait for all processes to complete
+        for process in processes:
+            process.join()
 
     finally:
         print("ROS bag capture and intrinsics saving completed for all cameras.")
