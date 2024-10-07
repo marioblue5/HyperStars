@@ -45,7 +45,7 @@ def enable_stepmotor(enable=True):
     # Assuming the TMC2209's Enable pin is active-low
     GPIO.output(ENABLE_pin, GPIO.LOW if enable else GPIO.HIGH)
 
-def move_stepmotor(direction, steps, delay=0.0005):
+def move_stepmotor(direction, steps, stepper_pin, switch_pin, delay=0.0005):
     """
     Moves the motor in the specified direction for a number of steps.
     :param direction: Direction to rotate (True for one way, False for the reverse).
@@ -53,16 +53,27 @@ def move_stepmotor(direction, steps, delay=0.0005):
     :param delay: Delay between steps in seconds.
     """
     GPIO.output(DIR_pin, direction)
-    for _ in range(steps):
-        if GPIO.input(LIMIT_pin_1) == GPIO.LOW || GPIO.input(LIMIT_pin_2) == GPIO.LOW: 
-            break
-        else
-        GPIO.output(STEP_pin_1, GPIO.HIGH)
-        GPIO.output(STEP_pin_2, GPIO.HIGH)
-        time.sleep(delay)
-        GPIO.output(STEP_pin_1, GPIO.LOW)
-        GPIO.output(STEP_pin_2, GPIO.LOW)
-        time.sleep(delay)
+    # Initialize the state
+    state = 1
+    GPIO.output(stepper_pin, GPIO.HIGH)
+    last_filp: float = time.time() # seconds
+    while True:
+        if GPIO.input(LIMIT_pin_1) == GPIO.LOW and GPIO.input(LIMIT_pin_2) == GPIO.LOW:
+            # position limit pin activated
+            yield None
+        elif steps <= 0:
+            # no steps left
+            yield None
+        else:
+            # check the previous state and flip pin upon next ddl
+            if time.time() - last_filp >= delay:
+                last_flip = time.time()
+                state = 0 if state else 1
+                steps -= state
+                if steps <= 0:
+                    continue
+                GPIO.output(stepper_pin, GPIO.HIGH if state else GPIO.LOW)
+            yield steps # The steps left
 
 try:
     enable_stepmotor(enable=True)  # Enable the motor before moving
