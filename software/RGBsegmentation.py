@@ -43,8 +43,13 @@ if colors.size == 0:
 lower_white = np.array([0.4, 0.4, 0.4])  # Lower bound for white [R, G, B]
 upper_white = np.array([1.0, 1.0, 1.0])  # Upper bound for white [R, G, B]
 
-upper_black = np.array([0.1, 0.1, 0.1])
+upper_black = np.array([0.2, 0.2, 0.2])
+upper_green = np.array([0.0,0.95,0.0])
+upper_red = np.array([0.95,0.0,0.0])
 
+red_green_condition = (colors[:, 0] > colors[:, 2]) & (colors[:, 1] > colors[:, 2])
+white_condition = np.all((colors >= lower_white) & (colors <= upper_white), axis=1)
+black_condition = np.all(colors <= upper_black, axis=1)
 
 # Create a mask for white points (everything that is white)
 mask_white = np.all((colors >= lower_white) & (colors <= upper_white), axis=1)
@@ -112,7 +117,9 @@ pcd.points = o3d.utility.Vector3dVector(tilted_points)
 # ------
 
 # Create a mask for non-white points (everything that is NOT white)
-mask_non_white = ~np.all((colors >= lower_white) & (colors <= upper_white) & (colors >= upper_black), axis=1)
+#mask_non_white = ~np.all((colors >= lower_white) & (colors <= upper_white) & (colors >= upper_black) & ( red_condition | green_condition ), axis=1)
+mask_non_white = ~(white_condition | black_condition) & (red_green_condition)
+
 
 # Apply the mask to the point cloud to keep only non-white points
 non_white_points = np.asarray(pcd.points)[mask_non_white]
@@ -123,11 +130,48 @@ pcd_non_white = o3d.geometry.PointCloud()
 pcd_non_white.points = o3d.utility.Vector3dVector(non_white_points)
 pcd_non_white.colors = o3d.utility.Vector3dVector(non_white_colors)
 
-# Visualize the segmented plant point cloud
-o3d.visualization.draw_geometries([pcd_non_white])
+# DBSCAN to remove small clusters
+
+labels = np.array(pcd_non_white.cluster_dbscan(eps=0.02, min_points=850, print_progress=True))
+
+# Identify the number of clusters and noise (label = -1 is considered noise)
+max_label = labels.max()
+print(f"Found {max_label + 1} clusters and noise")
+
+min_cluster_size = 50
+filtered_points = np.where(labels >= 0)[0]  # Exclude noise points (label = -1)
+
+# For each cluster, filter out the clusters that are too small
+for cluster_label in range(max_label + 1):
+    cluster_indices = np.where(labels == cluster_label)[0]
+    if len(cluster_indices) < min_cluster_size:
+        filtered_points = np.setdiff1d(filtered_points, cluster_indices)
+
+# Extract the remaining points from the point cloud
+filtered_pcd = pcd_non_white.select_by_index(filtered_points)
 
 
+# do another plane segmentation to only get lettuce layer and assign the bottom of this to be zero
+
+# Step 1: Perform plane segmentation with a larger distance threshold of 0.3
+plane_model, inliers = filtered_pcd.segment_plane(distance_threshold=0.05,
+                                                  ransac_n=3,
+                                                  num_iterations=1000)
+
+# Plane equation: ax + by + cz + d = 0
+a_thresh, b_thresh, c_thresh, d_thresh = plane_model
+print(f"Plane equation: {a_thresh:.2f}x + {b_thresh:.2f}y + {c_thresh:.2f}z + {d_thresh:.2f} = 0")
+
+plane_points = filtered_pcd.select_by_index(inliers)
+
+plane_points_np = np.asarray(plane_points.points)
+min_z = plane_points_np[:, 2].min()  # Find the minimum Z value
+
+plane_points_np[:, 2] -= min_z
+plane_points.points = o3d.utility.Vector3dVector(plane_points_np)
+
+o3d.visualization.draw_geometries([plane_points])
 
 #o3d.io.write_point_cloud("C:/Users/molina.mario/Desktop/mario/datasets/20241014_Data/Right/PreviousAttempts/Attempt2/segmented_plants.ply", pcd_non_white)
-o3d.io.write_point_cloud("C:/Users/slantin/Desktop/Code/HyperStars/software/right_segmented_aligned_plants.ply", pcd_non_white)
+o3d.io.write_point_cloud("C:/Users/slantin/Desktop/Code/HyperStars/software/right_segmented_aligned_plants.ply", plane_points)
 
