@@ -1,7 +1,6 @@
 import open3d as o3d
 import numpy as np
-import matplotlib.pyplot as plt
-import copy
+import datetime
 
 # Load your mesh
 #mesh_path = "C:/Users/molina.mario/Desktop/mario/datasets/20241014_Data/Right/PreviousAttempts/Attempt2/output_slac_mesh.ply"  # Replace with the path to your mesh file
@@ -23,6 +22,9 @@ rotated_points = np.dot(points, R.T)
 
 # Update the point cloud with the rotated points
 pcd.points = o3d.utility.Vector3dVector(rotated_points)
+
+#o3d.visualization.draw_geometries([pcd]) # see that the point cloud is now rotated as we expect
+#o3d.io.write_point_cloud("C:/Users/slantin/Desktop/Code/HyperStars/software/right_slac_raw.ply", pcd)
 
 # The rotated point cloud is still tilted, so now we segment out the white NFT channels, create a flat plane using plane segmentation
 # and tilt the point cloud again such that this plane is now 0 degrees
@@ -65,6 +67,7 @@ pcd_white.colors = o3d.utility.Vector3dVector(white_colors)
 
 # Visualize the rotated point cloud
 #o3d.visualization.draw_geometries([pcd_white]) # shows that the majority of points left are in the NFT channel plane--use this to establish the zero height and angle
+#o3d.io.write_point_cloud("C:/Users/slantin/Desktop/Code/HyperStars/software/right_nft.ply", pcd_white)
 
 #-----
 plane_model, inliers = pcd.segment_plane(distance_threshold=0.01,
@@ -113,6 +116,8 @@ pcd.points = o3d.utility.Vector3dVector(tilted_points)
 
 # Visualize the rotated point cloud
 #o3d.visualization.draw_geometries([pcd]) # see that the point cloud is now rotated as we expect
+#o3d.io.write_point_cloud("C:/Users/slantin/Desktop/Code/HyperStars/software/right_rotated.ply", pcd)
+#stop
 
 # ------
 
@@ -129,6 +134,11 @@ non_white_colors = colors[mask_non_white]
 pcd_non_white = o3d.geometry.PointCloud()
 pcd_non_white.points = o3d.utility.Vector3dVector(non_white_points)
 pcd_non_white.colors = o3d.utility.Vector3dVector(non_white_colors)
+
+# o3d.visualization.draw_geometries([pcd_non_white]) # see that the point cloud is now rotated as we expect
+# o3d.io.write_point_cloud("C:/Users/slantin/Desktop/Code/HyperStars/software/right_segmented_aligned.ply", pcd_non_white)
+# stop
+
 
 # DBSCAN to remove small clusters
 
@@ -170,8 +180,20 @@ min_z = plane_points_np[:, 2].min()  # Find the minimum Z value
 plane_points_np[:, 2] -= min_z
 plane_points.points = o3d.utility.Vector3dVector(plane_points_np)
 
-o3d.visualization.draw_geometries([plane_points])
+#o3d.visualization.draw_geometries([plane_points])
+
+# Generate a timestamp
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+# Define the output path with the timestamp in the filename
+output_path = f"C:/Users/slantin/Desktop/Code/HyperStars/software/plant_pcd_{timestamp}.ply"
+
+# Save the point cloud with the timestamped filename
+o3d.io.write_point_cloud(output_path, plane_points)
+
+print(f"Point cloud saved as: {output_path}")
+
 
 #o3d.io.write_point_cloud("C:/Users/molina.mario/Desktop/mario/datasets/20241014_Data/Right/PreviousAttempts/Attempt2/segmented_plants.ply", pcd_non_white)
-o3d.io.write_point_cloud("C:/Users/slantin/Desktop/Code/HyperStars/software/right_segmented_aligned_plants.ply", plane_points)
+#o3d.io.write_point_cloud("C:/Users/slantin/Desktop/Code/HyperStars/software/right_segmented_aligned_plants.ply", plane_points)
 
